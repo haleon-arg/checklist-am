@@ -16,7 +16,6 @@
   --muted: #8A9099;
   --user-bg: #1A2A1A;
   --bot-bg: #1E2022;
-  --accent: #E8EAEC;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -93,6 +92,85 @@ header {
 
 .chip:hover { border-color: var(--red); color: var(--text); background: #2A1515; }
 
+.chip.lup-btn {
+  background: #1A1A2E;
+  border-color: #5555AA;
+  color: #AAAAEE;
+  font-weight: 600;
+  font-size: 12px;
+}
+.chip.lup-btn:hover { border-color: #8888CC; color: #CCCCFF; background: #22224A; }
+
+/* LUP MODAL */
+.lup-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.lup-overlay.active { display: flex; }
+
+.lup-modal {
+  background: var(--mid);
+  border: 1px solid #5555AA;
+  border-top: 3px solid #8888CC;
+  border-radius: 10px;
+  padding: 20px;
+  width: 100%;
+  max-width: 440px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.lup-modal h2 {
+  font-size: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #AAAAEE;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+.lup-item {
+  background: var(--dark);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lup-item:hover { border-color: #8888CC; background: #16162A; }
+.lup-item:active { transform: scale(0.98); }
+
+.lup-icon { font-size: 20px; flex-shrink: 0; }
+.lup-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.lup-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.lup-close {
+  width: 100%;
+  margin-top: 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  transition: all 0.15s;
+}
+.lup-close:hover { border-color: var(--red); color: var(--text); }
+
+/* CHAT */
 #chat {
   flex: 1;
   overflow-y: auto;
@@ -118,13 +196,13 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
   font-family: 'IBM Plex Mono', monospace;
 }
 
-.msg.bot .avatar { background: var(--red); color: #fff; font-size: 11px; }
-.msg.user .avatar { background: var(--border); color: var(--muted); font-size: 11px; }
+.msg.bot .avatar { background: var(--red); color: #fff; }
+.msg.user .avatar { background: var(--border); color: var(--muted); }
 
 .bubble {
   background: var(--bot-bg);
@@ -146,6 +224,7 @@ header {
 .bubble strong { color: #fff; font-weight: 600; }
 .bubble ul { margin: 6px 0 6px 16px; }
 .bubble li { margin-bottom: 4px; }
+.bubble ol { margin: 6px 0 6px 16px; }
 .bubble .section-label {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 10px;
@@ -210,7 +289,6 @@ header {
   justify-content: center;
   flex-shrink: 0;
   transition: all 0.15s;
-  font-size: 16px;
 }
 
 #sendBtn:hover { background: #B82424; transform: scale(1.05); }
@@ -232,7 +310,6 @@ header {
   padding: 16px;
   margin-bottom: 4px;
 }
-
 .welcome-card h2 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
 .welcome-card p { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
 .welcome-card .machine-id {
@@ -262,7 +339,8 @@ header {
   <div class="status-dot"></div>
 </header>
 
-<div class="chips-bar" id="chips">
+<div class="chips-bar">
+  <span class="chip lup-btn" onclick="openLUP()">📋 LUP</span>
   <span class="chip" onclick="sendChip(this)">🔴 Alarma JAWS</span>
   <span class="chip" onclick="sendChip(this)">⚠️ Temperatura fuera de rango</span>
   <span class="chip" onclick="sendChip(this)">📽️ Film roto</span>
@@ -284,11 +362,84 @@ header {
   <span class="chip" onclick="sendChip(this)">🧹 Limpieza dosador</span>
 </div>
 
+<!-- LUP MODAL -->
+<div class="lup-overlay" id="lupOverlay" onclick="closeLUPOutside(event)">
+  <div class="lup-modal">
+    <h2>📋 Lecciones de Un Punto — Boato 1</h2>
+
+    <div class="lup-item" onclick="sendLUP('Mostrame el procedimiento LUP completo para el cambio de laminado en el Boato 1, paso a paso.')">
+      <div class="lup-icon">🎞️</div>
+      <div>
+        <div class="lup-title">Cambio de laminado / bobina</div>
+        <div class="lup-desc">Procedimiento de inicio de cambio del laminado</div>
+      </div>
+    </div>
+
+    <div class="lup-item" onclick="sendLUP('Mostrame el procedimiento LUP completo para la regulación de offset en el Boato 1, paso a paso.')">
+      <div class="lup-icon">📐</div>
+      <div>
+        <div class="lup-title">Regulación de offset</div>
+        <div class="lup-desc">Corrección de posición de parada según HMI</div>
+      </div>
+    </div>
+
+    <div class="lup-item" onclick="sendLUP('Mostrame el procedimiento LUP completo para la regulación de tubos dosificadores en el Boato 1.')">
+      <div class="lup-icon">🔧</div>
+      <div>
+        <div class="lup-title">Regulación de tubos dosificadores</div>
+        <div class="lup-desc">Para sobre más plano y sin pliegues en el sellado</div>
+      </div>
+    </div>
+
+    <div class="lup-item" onclick="sendLUP('Tengo PIMARS o falla de sellado en el Boato 1. Mostrame el procedimiento LUP completo paso a paso.')">
+      <div class="lup-icon">🔩</div>
+      <div>
+        <div class="lup-title">Pimars y falla de sellado</div>
+        <div class="lup-desc">Pasos frente a aparición de PIMARS o falla de sellado</div>
+      </div>
+    </div>
+
+    <div class="lup-item" onclick="sendLUP('Mostrame el procedimiento LUP completo para cambiar la tinta en los codificadores Videojet 2310 y 2330.')">
+      <div class="lup-icon">🖨️</div>
+      <div>
+        <div class="lup-title">Cambio de tinta codificadores</div>
+        <div class="lup-desc">Videojet 2310 (M501-12) y Videojet 2330 (M512-12)</div>
+      </div>
+    </div>
+
+    <div class="lup-item" onclick="sendLUP('Mostrame el procedimiento LUP completo para hacer la purga de picos y mangueras del aplicador hotmelt Nordson en el Boato 1.')">
+      <div class="lup-icon">🔵</div>
+      <div>
+        <div class="lup-title">Purga de picos y mangueras (hotmelt)</div>
+        <div class="lup-desc">Aplicador Nordson — Cola 1 y Cola 2</div>
+      </div>
+    </div>
+
+    <div class="lup-item" onclick="sendLUP('Tengo problemas con el apilador del Boato 1. Los sobres se traban o hay alarmas de interfase. Mostrame el troubleshooting completo del apilador.')">
+      <div class="lup-icon">📦</div>
+      <div>
+        <div class="lup-title">Troubleshooting apilador</div>
+        <div class="lup-desc">Sobres trabados, alarmas de interfase y sincronización</div>
+      </div>
+    </div>
+
+    <div class="lup-item" onclick="sendLUP('Mostrame los cuidados y el procedimiento LUP para manipular y limpiar el pico aplicador MiniBlue II del Boato 1.')">
+      <div class="lup-icon">💉</div>
+      <div>
+        <div class="lup-title">Pico aplicador MiniBlue II</div>
+        <div class="lup-desc">Detalles, cuidados y limpieza — filtro 200 mesh, pico 0.20mm</div>
+      </div>
+    </div>
+
+    <button class="lup-close" onclick="closeLUP()">✕ Cerrar</button>
+  </div>
+</div>
+
 <div id="chat">
   <div class="welcome-card">
-    <div class="machine-id">MOD: TO8N 2.0 · REV.0 · HALEON ARG</div>
+    <div class="machine-id">MOD: TO8N 2.0 · REV.0 · HALEON ARG · BOATO 1</div>
     <h2>¿Qué problema estás teniendo?</h2>
-    <p>Describí el síntoma, código de alarma o consulta de mantenimiento y te respondo basándome en los fascículos técnicos oficiales de Boato Pack.</p>
+    <p>Describí el síntoma o usá los botones de acceso rápido. Tocá <strong>📋 LUP</strong> para ver los procedimientos paso a paso de Haleon Argentina.</p>
   </div>
 </div>
 
@@ -302,148 +453,253 @@ header {
     </svg>
   </button>
 </div>
-<div class="footer-note">Respuestas basadas en los fascículos oficiales Boato Pack – TO8N 2.0 Rev.0</div>
+<div class="footer-note">Respuestas basadas en manuales y LUPs oficiales Haleon ARG – Boato 1 · TO8N 2.0 Rev.0</div>
 
 <script>
 const MANUAL_CONTEXT = `
-Eres un asistente técnico experto de la TORNADO EVO 2.0 de Boato Pack (TO8N 2.0 Rev.0), instalada en Haleon Argentina.
+Eres un asistente técnico experto de la TORNADO EVO 2.0 de Boato Pack (TO8N 2.0 Rev.0), instalada en Haleon Argentina como Boato 1 (E-730 / E-731).
 Respondes SIEMPRE en español, con respuestas completas y detalladas para operadores de planta.
 
 REGLAS OBLIGATORIAS:
 - Para cualquier alarma: explicá qué significa, la causa probable más común, y los pasos de resolución numerados y detallados.
-- Para operaciones: pasos numerados con detalle de cada acción. Indicá siempre si requiere máquina detenida o puede hacerse en marcha.
-- Para mantenimiento: indicá frecuencia, herramientas necesarias y si debe hacerse con máquina parada.
-- Siempre incluí advertencias de seguridad relevantes (⚠️).
+- Para operaciones y LUPs: seguí los pasos exactos del procedimiento, numerados y completos.
+- Siempre incluí advertencias de seguridad relevantes con el símbolo de advertencia.
 - Si hay varias causas posibles, listalas todas en orden de probabilidad.
 - Nunca des una respuesta de una sola línea — siempre desarrollá la respuesta completa.
-- Si no encontrás la info exacta en el manual, decilo claramente y sugerí contactar a BOATO PACK (C.A.T.).
+- Si no encontrás la info exacta, decilo claramente y sugerí contactar al FLL o asistente mecánico.
 
 === ENCENDIDO ===
 1. Conectar aire a la válvula
 2. Girar interruptor a ON
 3. Hacer login en panel
-4. Presionar RESET → inicia homing
+4. Presionar RESET — inicia homing
 5. Selector DOSER en UP para el homing
 6. Led START verde fijo = listo
-7. Activar HEATERS → esperar temperatura
+7. Activar HEATERS — esperar temperatura
 8. Verificar DOORS, AIR, REEL en barra superior
+
+=== LUP — CAMBIO DE LAMINADO / BOBINA ===
+ADVERTENCIA: Usar EPPs adecuados para toda la operación.
+1. Esperar que el equipo se detenga por fin de bobina — el HMI muestra "Fin de bobina - Digitale"
+2. Abrir cualquiera de las dos puertas por donde ingresa el laminado a la llenadora
+3. Ir al HMI y tomar la llave que está puesta en la emergencia. Introducirla en el comando MANTENIMIENTO y girar hacia la derecha — esto habilita los comandos del paso siguiente
+4. Abrir las puertas donde está el laminado y presionar en orden:
+   a. LOCK 1 y LOCK 2
+   b. FWD y REV en simultáneo — libera el cilindro porta rollo
+5. Continuar con el procedimiento habitual de cambio
+NOTA IMPORTANTE: Verificar que el tope de laminado esté dentro de CENTERLINE antes de introducirlo en el cono de la bobina.
+
+=== LUP — REGULACION DE OFFSET ===
+Cuándo aplicar: cuando la máquina no se detiene en el punto grabado según el HMI — posición errónea visible. Causas posibles: colisión, trabamiento, falta de limpieza o lubricación.
+1. Ingresar con usuario NIVEL 5 — el nivel operador NO permite modificar parámetros
+2. Navegar por el HMI hasta el punto que se necesite modificar el offset
+3. Ingresar el valor que se crea necesario para la situación particular y guardar con contraseña
+4. Realizar HOMING GENERAL al equipo para que el punto regulado tome el nuevo valor
+5. Verificar visualmente que el equipo haya modificado la posición según los valores ingresados. Poner en RUN y probar. Si la regulación no es satisfactoria, repetir los pasos.
+ATENCION: En ciertos casos particulares, si la llenadora o estuchadora no realiza ninguna corrección según los parámetros indicados, se debe apagar el equipo UNICAMENTE desde la perilla verde, esperar su apagado completo y volver a encenderlo. Una vez reiniciado, verificar si realiza la corrección durante el homing inicial. Si no lo hace, repetir los pasos del 1 al 5.
+
+=== LUP — REGULACION DE TUBOS DOSIFICADORES ===
+Objetivo: obtener sobre más plano, sin pliegues en el sellado y con mejor apilado.
+1. Poner en RUN la línea sin producto y con los tubos abajo. Retirar una muestra de cada carril.
+2. Tomar un sobre del carril afectado y cortarlo por la mitad con tijera por la línea central
+3. Tomar el sobre desde los laterales y verificar que la curvatura esté bien distribuida en ambos lados. Mirando desde arriba del tubo se puede regular la posición en las direcciones que indica la flecha.
+4. Para regular la posición del tubo: aflojar los tornillos hexagonales de 10mm que sujetan el tubo y moverlo en la dirección que corresponda para corregir la imperfección
+5. Para mayor regulación de la distribución del contenido: verificar estado de rodillos, estado de resortes y verificar presión.
+
+=== LUP — PIMARS Y FALLA DE SELLADO ===
+Pasos frente a aparición de PIMARS o falla de sellado en el Boato 1:
+SI HAY SAL EN EL SELLADO:
+- Verificar que los tubos de dosificación no estén tapados
+- Lavar Cut-Off y verificar que no exista pérdida de sal
+SI NO HAY SAL EN EL SELLADO:
+- Lavar pista por donde se desliza el conjunto de mordazas
+- Retirar pernos de resortes de presión y lavarlos junto con el alojamiento donde se encuentran
+- Verificar que el movimiento horizontal de las mordazas no presente resistencia antes de armar nuevamente
+En ambos casos, si sigue la falla: dar aviso al FLL y asistente mecánico.
+
+=== LUP — CAMBIO DE TINTA CODIFICADORES VIDEOJET 2310 Y 2330 ===
+ADVERTENCIA: Usar EPPs adecuados para toda la operación.
+IMPORTANTE: Solo agregar tinta cuando la barra de estado está por debajo del 5% en CLARiTY.
+Tinta Videojet 2310: accesorio nro M501-12 | Tinta Videojet 2330: accesorio nro M512-12
+1. Dejar fuera de línea el codificador presionando la pantalla (punto A) y luego presionar la opción CONSUMIBLES (punto B)
+2. En la página de CONSUMIBLES: pulsar el botón AGREGAR TINTA
+3. Usar el teclado para introducir el código de la botella de tinta que aparece impreso en la etiqueta de la botella. Pulsar ACEPTAR.
+4. Cuando el equipo haya validado el código: retirar la botella de tinta vacía girando delicadamente hacia la izquierda. Retirar la tapa protectora de la nueva botella. Colocar la nueva botella en el tobogán y girarla cuidadosamente hacia la derecha hasta que esté completamente ajustada. NO FORZAR.
+5. Al finalizar el cambio: poner en marcha el equipo.
+
+=== LUP — PURGA DE PICOS Y MANGUERAS HOTMELT NORDSON ===
+ADVERTENCIA: Usar lentes de seguridad y guantes de alta temperatura.
+ANTES DE COMENZAR: Sacar el soporte del aplicador retirando el tornillo con llave M10 (Cola 1 o Cola 2 según corresponda). Apoyarlo en una zona donde pueda aplicar hotmelt de manera continua sin interferencia. Como blanco del disparo colocar cartón o recipiente de inoxidable.
+1. Desde el HMI: seleccionar MENU — se despliega una lista de funciones en el lateral derecho
+2. Seleccionar "encartonadora" (1) y luego seleccionar "fases" (2)
+3. Para iniciar el disparo: la estuchadora debe estar en condiciones de arranque. Apretar y mantener presionado el botón "PRUEBA" durante un mínimo de 5 minutos (según estado de suciedad o falla).
+   Verificar: que no salga suciedad, continuidad del chorro, sin goteo desde el pico, y que entre disparos aleatorios reaccione correctamente la electroválvula.
+4. Colocar el aplicador en su posición habitual.
+(El procedimiento aplica por separado para Cola 1 y Cola 2)
+
+=== LUP — PICO APLICADOR MINIBLUE II ===
+Equipo: E-730 Boato 1. Filtro: 200 mesh. Diámetro del pico: 0.20mm.
+ADVERTENCIA CRITICA: EXTREMO CUIDADO DE NO GOLPEAR LA AGUJA AL MANIPULAR.
+ADVERTENCIA: Usar guantes de temperatura en TODA la maniobra con módulos.
+Limpieza: usar aguja especial para la limpieza del pico.
+Instalación del pico:
+1. Roscar el pico a mano sobre los hilos del módulo hasta tope
+2. Usar llave torquímetro para ajustar a 4.5 N.m (40 in-lb). NO FORZAR.
+Torque recomendado para ajuste del pico: 4.5 N.m
+
+=== TROUBLESHOOTING APILADOR — BOATO 1 ===
+SOBRES SE TRABAN EN EL APILADOR:
+¿El sobre tiene plateado o está más ancho que otros carriles? SI: ver laminado de llenadora y corregir desplazamiento de foil.
+¿Se traban al ingreso del apilador? SI: verificar estado de correas ECO PUR, parámetros HMI zona apilador y cilindro neumático de clapeta.
+¿Se cae la pila de sobres cuando avanza la cadena? — ¿Apilador de 2 sobres en posición correcta y lubricado? NO: revisar parámetros HMI, ajustar posición, lubricar accionamiento y revisar tornillería.
+¿Tubos de dosificación bien centrados? NO: revisar carriles afectados mediante LUP de regulación de tubos.
+
+ALARMA "INTERFAZ - TRANSPORTE Y CILINDRO CENTRADOR - ALARMA DE INTERFASE":
+- Verificar offset de cangilones agrupador en HMI y controlar que los cangilones estén paralelos entre sí
+- Revisar estado de cilindro y reguladores, accionamiento de sensores y parámetros del HMI
+- Verificar acople de cadena del apilador — ajuste de tornillería y juego muerto
+- Si el acople del servo tiene juego o tornillos flojos: ajustar tornillería, descartar juego, corregir offset. Si persiste juego muerto: dar aviso al asistente mecánico y FLL.
+
+ALARMA "INTERFAZ - TRANSPORTE Y APILADOR - ALARMA DE SINCRONIZACION":
+- Verificar estado de sensores y lectura correcta
+
+APILADOR CUENTA ERRONEAMENTE O DETIENE LA MAQUINA POR FALTA DE SOBRES:
+- Revisar estado de sensor en interfase
+- Realizar limpieza de la cadena del apilador (mismo método que AM semanal)
+
+SOBRES SE INTRODUCEN MAL EN LA INTERFASE:
+- Revisar parámetros HMI, ajustar posición, lubricar accionamiento y revisar tornillería
+
+EMPUJADOR AF NO ACTIVA:
+- Verificar si el apilador de 10 sobres está funcionando correctamente
+- Revisar parámetros HMI, verificar lubricación y tornillería
 
 === CAMBIO DE BOBINA ===
 1. Modo manual (selector MAINTENANCE)
-2. Presionar BLOCCO 1 + BLOCCO 2 → bloquea film
+2. Presionar BLOCCO 1 + BLOCCO 2 — bloquea film
 3. Cortar material por el invito de la placa (PELIGRO: LAMA)
-4. AVANTI + INDIETRO simultáneos 2 seg → desbloquea eje
-5. Abrir portezuelo → rotar palanca de seguridad
+4. AVANTI + INDIETRO simultáneos 2 seg — desbloquea eje
+5. Abrir portezuelo — rotar palanca de seguridad
 6. Retirar conjunto eje-bobina
-7. Desinflar eje → retirar bobina vacía
-8. Montar nueva bobina → inflar con pistola de aire
+7. Desinflar eje — retirar bobina vacía
+8. Montar nueva bobina — inflar con pistola de aire
 9. Reinsertar eje
 10. Empalmar film con cinta adhesiva
-11. Cerrar portezuelo → volver a automático → homing
+11. Cerrar portezuelo — volver a automático — homing
 
 === PASAJE DE FILM ===
 1. Modo manual (MAINTENANCE)
 2. Desde panel desactivar: cuchillas rotantes, tacca, giunzione, centraje automático
 3. Desenvolver bobina siguiendo esquema del adhesivo en placa lateral
-4. Al llegar a cuchilla divisora: tirar film → se divide en 2 fajas iguales
+4. Al llegar a cuchilla divisora: tirar film — se divide en 2 fajas iguales
 5. Enrollar film en soportes de teflón y rodillos de goma
 6. Superponer las 2 fajas, unir con cinta, insertar entre rodillos con cartón
 7. Mano derecha: botón inching | Mano izquierda: cartón
 8. Asegurar que film pase por mordazas y entre rodillos staccabuste
-9. Desactivar inching → cerrar puertas → volver a automático
+9. Desactivar inching — cerrar puertas — volver a automático
 
 === ALINEAMIENTO DE FILM ===
-⚠️ Referencia siempre desde el FRENTE de la máquina. Desactivar alineamiento automático primero.
-CONDICIÓN 1 – Desalineamiento hacia interior (cuchilla):
-  Actuar sobre manopola lado izquierdo. SOLO con máquina EN MOVIMIENTO.
-  Referencia: material igual en extremo de bolsita 1.
-CONDICIÓN 2 – Desalineamiento hacia interior (bobina):
-  Mover bobina desde panel (flechas REEL). Luego posicionar fotocélula de centraje.
-  Referencia: material igual al borde de bolsita 6.
-CONDICIÓN 3 – Desalineamiento hacia exterior:
-  Actuar sobre manopola divisor de film.
+Referencia siempre desde el FRENTE de la máquina. Desactivar alineamiento automático primero.
+CONDICION 1 — Desalineamiento hacia interior (cuchilla): Actuar sobre manopola lado izquierdo. SOLO con máquina EN MOVIMIENTO.
+CONDICION 2 — Desalineamiento hacia interior (bobina): Mover bobina desde panel (flechas REEL). Luego posicionar fotocélula de centraje.
+CONDICION 3 — Desalineamiento hacia exterior: Actuar sobre manopola divisor de film.
 
-=== PANEL – TECLAS FÍSICAS ===
-START: led verde fijo=listo | parpadeante=en marcha | apagado=no disponible
+=== PANEL — TECLAS FISICAS ===
+START: led verde fijo = listo | parpadeante = en marcha
 STOP: para en fase, completa 2 ciclos, para en posición 0
-RESET: resetea alarmas/emergencias + inicia homing. Obligatorio en cada encendido.
+RESET: resetea alarmas y emergencias + inicia homing. Obligatorio en cada encendido.
 INCHING: movimiento lento en modo manual (mantener presionado)
 EMERGENCY: para inmediata, corta potencia y purga neumática. Requiere llave para reponer.
-MAINTENANCE: activa modo manual. Al volver a automático → homing automático.
-DOSER UP/DOWN: UP=dosador arriba (requerido para homing) | DOWN=dosador en línea
+MAINTENANCE: activa modo manual. Al volver a automático — homing automático.
+DOSER UP/DOWN: UP = dosador arriba (requerido para homing) | DOWN = dosador en línea
 
-=== PANEL – BARRA SUPERIOR ===
-EMERG: rojo=emergencia | verde=normal
-DOORS: rojo=puerta abierta | verde=todas cerradas
-MANUAL: rojo=modo manual | verde=automático
-AIR: rojo=falta aire (debe ser 6 bar) | verde=OK
-REEL: rojo=bobina terminada | rojo parpadeante=por terminar | verde=OK
-TIMING: verde=homing OK | verde parpadeante=en curso | gris=no ejecutado
+=== PANEL — BARRA SUPERIOR ===
+EMERG: rojo = emergencia | verde = normal
+DOORS: rojo = puerta abierta | verde = todas cerradas
+MANUAL: rojo = modo manual | verde = automático
+AIR: rojo = falta aire (debe ser 6 bar) | verde = OK
+REEL: rojo = bobina terminada | rojo parpadeante = por terminar | verde = OK
+TIMING: verde = homing OK | verde parpadeante = en curso | gris = no ejecutado
 
 === ALARMAS CUMULATIVE ===
-Todas indican motor/drive en alarma. Verificar drive correspondiente. Si persiste: contactar BOATO PACK o servicio SBC/PARKER.
-FILM CUMULATIVE: motor de avanzamiento
-KNIFE CUMULATIVE: motor cuchilla
-JAWS CUMULATIVE: motor mordazas
-STRIP CUMULATIVE: motor cuchilla strip
-UNWINDER CUMULATIVE: motor desbobinador
-POWDER DOSER CUMULATIVE: motor dosificador polvos
-LIQUID DOSER CUMULATIVE: motor dosificador líquidos
-INFEED CUMULATIVE: motor cinta infeed
-PRECUT CUMULATIVE: motor precut
+Todas indican motor o drive en alarma. Verificar drive correspondiente. Si persiste: contactar BOATO PACK o servicio SBC/PARKER.
+FILM CUMULATIVE: motor avanzamiento | KNIFE CUMULATIVE: motor cuchilla | JAWS CUMULATIVE: motor mordazas
+STRIP CUMULATIVE: motor cuchilla strip | UNWINDER CUMULATIVE: motor desbobinador
+POWDER DOSER CUMULATIVE: motor dosificador polvos | LIQUID DOSER CUMULATIVE: motor dosificador líquidos
 
 === ALARMAS OVERLOAD ===
-Todas indican interruptor automático disparado por sobrecorriente.
-Acción general: verificar cuál interruptor está apagado → reponerlo → controlar motor/dispositivo.
-Si se repite: revisar mecánica y absorción de corriente.
+Interruptor automático disparado por sobrecorriente. Verificar cuál interruptor está apagado — reponerlo — controlar motor. Si se repite: revisar mecánica y absorción de corriente.
 
-=== ALARMAS – SEGURIDAD ===
+=== ALARMAS — SEGURIDAD ===
 SAFETY DOORS OPEN: Verificar cierre correcto de puertas y sensores
 EMERGENCY BUTTON PRESSED: Reponer botones con llave, verificar sistema
 SAFETY KEY OPEN: Cerrar portezuelo del desbobinador
 EMERGENCY CIRCUIT NOT INSERTED: Verificar puertas, botones y dispositivos de control
 
-=== ALARMAS – MOVIMIENTO ===
-JAWS PROXIMITY DETECTION MISSING: Fotocélula no detectó marca 5 veces → material mal posicionado o fotocélula sucia
+=== ALARMAS — MOVIMIENTO ===
+JAWS PROXIMITY DETECTION MISSING: Fotocélula no detectó marca 5 veces — material mal posicionado o fotocélula sucia
 REEL CENTERING LIMIT REACHED: Mover bobina manualmente desde panel. Verificar sensor de centraje.
 FILM UNWINDER SPEED TOO LOW: Controlar desbobinador y pasaje de material
-FILM BROKEN: Ballerino en posición más baja → controlar desbobinador y pasaje de material
+FILM BROKEN: Controlar desbobinador y pasaje de material
 SACHET JAM ON EXIT BELT: Controlar bolsitas atascadas en cuchilla, deviadores o toboganes
 BAG LENGTH DIFFERENCE TOO HIGH: Fotocélula no alineada con marca de registro
 MARK DETECTION MISSING: Fotocélula sucia o material mal posicionado
-STRIP/KNIFE/JAWS MOVEMENT TIMEOUT: Movimiento demasiado lento → verificar motor y sensores
-POWDER DOSER OUT OF LINE: En manual mover dosador a línea. En automático controlar sistema.
-POWDER DOSER HOMING TIMEOUT: Verificar drive, motor, transmisiones y sensor de homing
-END OF PRODUCT (1,2,3,4): Agregar producto. Verificar sistema de carga.
+END OF PRODUCT: Agregar producto. Verificar sistema de carga.
 END OF REEL: Sustituir bobina
 
-=== ALARMAS – TEMPERATURA ===
+=== ALARMAS — TEMPERATURA ===
 TEMPERATURE OUT OF RANGE: Esperar que mordazas y rodillos alcancen temperatura configurada. Controlar termocuplas y resistencias.
 LEFT/RIGHT ROLL/JAWS TEMPERATURE: Verificar sensor de temperatura y calentador
 THERMOREGULATORS COMMUNICATION ERRORS: Verificar conexión entre termorreguladores y unidad de control
 
-=== ALARMAS – TABLERO ===
+=== ALARMAS — TABLERO ===
 AIR LOW PRESSURE: Controlar manómetro (debe indicar 6 bar). Verificar pérdidas.
 ELECTRIC BOARD TEMPERATURE: Limpiar o sustituir filtros del aire acondicionado del tablero
 INVERTER ALARM: Consultar manual del inverter según código de alarma
 DRIVES POWER ALARM: Verificar interruptor automático y dispositivo
 
+=== CHECKWEIGHER WIPOTEC HC-A 10 PISTAS ===
+Equipo de control de peso en línea conectado al Boato. Expulsa bolsitas fuera de peso al cajón de rechazo.
+TIPOS DE MENSAJE: M = Información (máquina no para) | E = Advertencia (máquina no para) | A = Alarma (máquina SE DETIENE — corregir causa — presionar Confirmar)
+COMO CONFIRMAR UN ERROR: Corregir la causa del problema. Presionar botón Confirmar en pantalla principal, o ir a Menú Mensajes de error — Error sin acusar — Confirmar.
+Error 0064: Artículos consecutivos con SOBREPESO — Verificar dosificador Boato
+Error 0065: Artículos consecutivos con BAJO PESO — Verificar dosificador Boato
+Error 0066: Cajón de rechazo semi-lleno — Vaciar cajón de rechazo
+Error 0067: Cajón de rechazo LLENO — Vaciar cajón de rechazo (urgente, máquina para)
+Error 0128: Artículos consecutivos con mismo defecto — Verificar Boato y proceso
+Error 0134: Cubierta protectora abierta — Cerrar cubierta — Confirmar — Reiniciar
+CORRECCION DE PUNTO CERO: En automático se hace sola cuando detecta brecha en el flujo. Si no puede en 15 min: advertencia. Si no puede en 30 min: alarma y parada. Corrección manual: Ajustes — Componentes — Célula de pesaje — Puesta a cero (cinta vacía y detenida).
+LIMPIEZA: NO usar aire comprimido en células de pesaje. NO usar agua a presión, vapor ni productos clorados.
+
 === MANTENIMIENTO ===
-DIARIO: Limpiar cintas/correas, guías del dosador y estación de sellado (mordazas y rodillos con cepillo de bronce)
+DIARIO: Limpiar cintas y correas, guías del dosador y estación de sellado (mordazas y rodillos con cepillo de bronce)
 SEMANAL: Engrasar guías lineales del dosador, cut-off y astucciadora
 CADA 80-100 HS: Engrasar levas mecánicas de la astucciadora (máquina detenida)
 MENSUAL: Verificar cojinetes, lubricar engranajes internos, verificar juntas del dosador, controlar resortes de mordazas y rodillos, controlar filtros neumáticos
 CAMBIO DE PRODUCTO: Limpieza a fondo de todas las partes en contacto con el producto en el dosador
-
-NOTAS:
-- Presión excesiva en mordazas/rodillos = deterioro prematuro
-- NO tocar cuchillas easy tear notch
-- NO usar aire comprimido para limpiar cuchillas — aspirar
-- Lubricar superficies laterales de cuchillas con pasta Molykote BR2
+NOTAS IMPORTANTES: NO tocar cuchillas easy tear notch. NO usar aire comprimido para limpiar cuchillas — aspirar. Lubricar superficies laterales de cuchillas con pasta Molykote BR2.
 `;
 
 let history = [];
 let isLoading = false;
+
+function openLUP() {
+  document.getElementById('lupOverlay').classList.add('active');
+}
+
+function closeLUP() {
+  document.getElementById('lupOverlay').classList.remove('active');
+}
+
+function closeLUPOutside(event) {
+  if (event.target === document.getElementById('lupOverlay')) closeLUP();
+}
+
+function sendLUP(text) {
+  closeLUP();
+  document.getElementById('userInput').value = text;
+  sendMessage();
+}
 
 function autoResize(el) {
   el.style.height = 'auto';
@@ -536,34 +792,59 @@ async function sendMessage() {
   const input = document.getElementById('userInput');
   const text = input.value.trim();
   if (!text || isLoading) return;
+
   input.value = '';
   input.style.height = 'auto';
   isLoading = true;
   document.getElementById('sendBtn').disabled = true;
+
   appendMsg('user', text);
   history.push({ role: 'user', content: text });
   showTyping();
-  try {
-    const response = await fetch('https://boato-ai-proxy.sebadegraf.workers.dev', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ system: MANUAL_CONTEXT, messages: history.slice(-4), max_tokens: 1000 })
-    });
-    const data = await response.json();
-    const reply = data.content?.[0]?.text || 'No pude obtener respuesta. Intentá de nuevo.';
-    history.push({ role: 'assistant', content: reply });
-    removeTyping();
-    appendMsg('bot', formatResponse(reply), true);
-  } catch (err) {
-    removeTyping();
-    appendMsg('bot', '⚠️ Error de conexión. Verificá la red e intentá de nuevo.', true);
-    console.error(err);
+
+  let attempts = 0;
+  const maxAttempts = 3;
+
+  while (attempts < maxAttempts) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 20000);
+
+      const response = await fetch('https://boato-ai-proxy.sebadegraf.workers.dev', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system: MANUAL_CONTEXT,
+          messages: history.slice(-4),
+          max_tokens: 1000
+        }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeout);
+      const data = await response.json();
+      const reply = data.content?.[0]?.text || 'No pude obtener respuesta. Intentá de nuevo.';
+      history.push({ role: 'assistant', content: reply });
+      removeTyping();
+      appendMsg('bot', formatResponse(reply), true);
+      break;
+
+    } catch (err) {
+      attempts++;
+      if (attempts < maxAttempts) {
+        await new Promise(r => setTimeout(r, 3000));
+      } else {
+        removeTyping();
+        appendMsg('bot', '⚠️ Sin respuesta después de 3 intentos. Verificá la red e intentá de nuevo.', true);
+        console.error(err);
+      }
+    }
   }
+
   isLoading = false;
   document.getElementById('sendBtn').disabled = false;
   input.focus();
 }
 </script>
-
 </body>
 </html>
