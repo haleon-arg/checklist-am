@@ -101,6 +101,15 @@ header {
 }
 .chip.lup-btn:hover { border-color: #8888CC; color: #CCCCFF; background: #22224A; }
 
+.chip.wipotec-btn {
+  background: #1A2A1A;
+  border-color: #3A7A3A;
+  color: #88CC88;
+  font-weight: 600;
+  font-size: 12px;
+}
+.chip.wipotec-btn:hover { border-color: #66AA66; color: #AAFFAA; background: #1E3A1E; }
+
 /* LUP MODAL */
 .lup-overlay {
   display: none;
@@ -341,6 +350,7 @@ header {
 
 <div class="chips-bar">
   <span class="chip lup-btn" onclick="openLUP()">📋 LUP</span>
+  <span class="chip wipotec-btn" onclick="openWipotec()">⚖️ Wipotec</span>
   <span class="chip" onclick="sendChip(this)">🔴 Alarma JAWS</span>
   <span class="chip" onclick="sendChip(this)">⚠️ Temperatura fuera de rango</span>
   <span class="chip" onclick="sendChip(this)">📽️ Film roto</span>
@@ -432,6 +442,95 @@ header {
     </div>
 
     <button class="lup-close" onclick="closeLUP()">✕ Cerrar</button>
+  </div>
+</div>
+
+<!-- WIPOTEC MODAL -->
+<div class="lup-overlay" id="wipotecOverlay" onclick="closeWipotecOutside(event)">
+  <div class="lup-modal" style="border-top-color: #66AA66; border-color: #3A7A3A;">
+    <h2 style="color: #88CC88;">⚖️ Wipotec HC-A — Problemas frecuentes</h2>
+
+    <div class="lup-item" onclick="sendWipotec('La máquina Wipotec tiene una alarma tipo A y se detuvo. Qué hago para identificar el error y confirmar la alarma?')">
+      <div class="lup-icon">🔴</div>
+      <div>
+        <div class="lup-title">Alarma — máquina parada</div>
+        <div class="lup-desc">Cómo identificar y confirmar una alarma tipo A</div>
+      </div>
+    </div>
+
+    <div class="lup-item" onclick="sendWipotec('El cajón de rechazo del Wipotec está lleno o semilleno y la máquina paró. Qué hago?')">
+      <div class="lup-icon">🗑️</div>
+      <div>
+        <div class="lup-title">Cajón de rechazo lleno</div>
+        <div class="lup-desc">Error 0066 / 0067 — cajón semilleno o lleno</div>
+      </div>
+    </div>
+
+    <div class="lup-item" onclick="sendWipotec('El Wipotec está rechazando varios artículos consecutivos por sobrepeso. Error 0064. Qué hago?')">
+      <div class="lup-icon">⬆️</div>
+      <div>
+        <div class="lup-title">Artículos con sobrepeso consecutivos</div>
+        <div class="lup-desc">Error 0064 — últimos artículos por encima del peso</div>
+      </div>
+    </div>
+
+    <div class="lup-item" onclick="sendWipotec('El Wipotec está rechazando varios artículos consecutivos por bajo peso. Error 0065. Qué hago?')">
+      <div class="lup-icon">⬇️</div>
+      <div>
+        <div class="lup-title">Artículos con bajo peso consecutivos</div>
+        <div class="lup-desc">Error 0065 — últimos artículos por debajo del peso</div>
+      </div>
+    </div>
+
+    <div class="lup-item" onclick="sendWipotec('El Wipotec tiene el error 0128, artículos consecutivos con el mismo defecto. Qué hago?')">
+      <div class="lup-icon">⚠️</div>
+      <div>
+        <div class="lup-title">Artículos consecutivos con mismo defecto</div>
+        <div class="lup-desc">Error 0128 — error de longitud, separación u otro</div>
+      </div>
+    </div>
+
+    <div class="lup-item" onclick="sendWipotec('El Wipotec tiene el error 0134 de cubierta protectora abierta. Qué hago?')">
+      <div class="lup-icon">🚪</div>
+      <div>
+        <div class="lup-title">Cubierta protectora abierta</div>
+        <div class="lup-desc">Error 0134 — cubierta no cerrada correctamente</div>
+      </div>
+    </div>
+
+    <div class="lup-item" onclick="sendWipotec('Necesito hacer la corrección de punto cero o tara manual en el Wipotec. Cómo lo hago?')">
+      <div class="lup-icon">🔄</div>
+      <div>
+        <div class="lup-title">Corrección de punto cero / tara</div>
+        <div class="lup-desc">Tara automática y corrección manual paso a paso</div>
+      </div>
+    </div>
+
+    <div class="lup-item" onclick="sendWipotec('Cómo inicio la producción en el Wipotec? Cuáles son los pasos?')">
+      <div class="lup-icon">▶️</div>
+      <div>
+        <div class="lup-title">Inicio de producción</div>
+        <div class="lup-desc">Pasos para arrancar el Wipotec correctamente</div>
+      </div>
+    </div>
+
+    <div class="lup-item" onclick="sendWipotec('Cómo hago un cambio de artículo o producto en el Wipotec?')">
+      <div class="lup-icon">🔁</div>
+      <div>
+        <div class="lup-title">Cambio de artículo / producto</div>
+        <div class="lup-desc">Selección y cambio de receta en el Wipotec</div>
+      </div>
+    </div>
+
+    <div class="lup-item" onclick="sendWipotec('Cuáles son las indicaciones de limpieza del Wipotec? Qué productos están prohibidos?')">
+      <div class="lup-icon">🧹</div>
+      <div>
+        <div class="lup-title">Limpieza del equipo</div>
+        <div class="lup-desc">Qué usar, qué NO usar y cómo limpiar correctamente</div>
+      </div>
+    </div>
+
+    <button class="lup-close" onclick="closeWipotec()">✕ Cerrar</button>
   </div>
 </div>
 
@@ -697,6 +796,24 @@ function closeLUPOutside(event) {
 
 function sendLUP(text) {
   closeLUP();
+  document.getElementById('userInput').value = text;
+  sendMessage();
+}
+
+function openWipotec() {
+  document.getElementById('wipotecOverlay').classList.add('active');
+}
+
+function closeWipotec() {
+  document.getElementById('wipotecOverlay').classList.remove('active');
+}
+
+function closeWipotecOutside(event) {
+  if (event.target === document.getElementById('wipotecOverlay')) closeWipotec();
+}
+
+function sendWipotec(text) {
+  closeWipotec();
   document.getElementById('userInput').value = text;
   sendMessage();
 }
