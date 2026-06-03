@@ -231,31 +231,22 @@ var CL_BOATO1_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRI7ozZHepo
 // LN_BOATO1_LOADED removed - always fetch fresh
 
 function loadBoato1FromSheets(callback) {
-  fetch(CL_BOATO1_URL + '&t=' + Date.now())
-    .then(function(r){ return r.text(); })
-    .then(function(csv){
-      var lines = csv.trim().split('\n');
+  // Lee via Apps Script (evita CORS de Zscaler)
+  var url = SU + '?action=get&sheet=CL_Boato1&t=' + Date.now();
+  fetch(url, { method: 'GET', mode: 'cors' })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var rows = data.rows || [];
       var skus = {};
-      function parseCSVLine(line) {
-        var result = [], cur = '', inQ = false;
-        for (var c = 0; c < line.length; c++) {
-          var ch = line[c];
-          if (ch === '"') { inQ = !inQ; }
-          else if (ch === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
-          else { cur += ch; }
-        }
-        result.push(cur.trim());
-        return result;
-      }
-      // skip row 0 (instructions) and row 1 (headers)
-      for (var i = 2; i < lines.length; i++) {
-        var cols = parseCSVLine(lines[i]);
-        if (cols.length < 5) continue;
-        var sku  = cols[0].replace(/"/g,'').trim();
-        var num  = cols[1].replace(/"/g,'').trim();
-        var nm   = cols[2].replace(/"/g,'').trim();
-        var ref  = cols[3].replace(/"/g,'').trim();
-        var desc = cols[4].replace(/"/g,'').trim();
+      // rows: [sku, num, nombre, referencia, descripcion]
+      for (var i = 0; i < rows.length; i++) {
+        var cols = rows[i];
+        if (!cols || cols.length < 5) continue;
+        var sku  = String(cols[0]).trim();
+        var num  = String(cols[1]).trim();
+        var nm   = String(cols[2]).trim();
+        var ref  = String(cols[3]).trim();
+        var desc = String(cols[4]).trim();
         if (!sku || sku === 'SKU') continue;
         if (!skus[sku]) skus[sku] = { lb: 'Boato 1 ' + sku, it: [] };
         skus[sku].it.push({
@@ -265,14 +256,16 @@ function loadBoato1FromSheets(callback) {
           d: desc
         });
       }
-      // Merge into LN.boato1
       LN.boato1.sk = {};
       Object.keys(skus).forEach(function(k){
         LN.boato1.sk[k] = skus[k];
       });
       callback();
     })
-    .catch(function(){ callback(); }); // fallback silencioso
+    .catch(function(e){ 
+      console.warn('Error cargando CL Boato1:', e);
+      callback(); 
+    });
 }
 
 var TOL=0.10,CV='home',CI=[],CL='',CV2={},CV3={},AR=[];
