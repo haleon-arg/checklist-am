@@ -312,20 +312,16 @@ function loadSIG2FromSheets(empaque, callback) {
         var desc     = String(cols[5]).trim();
         var emp      = String(cols[6]).trim();
         if (!sku || sku === 'SKU') continue;
-        // Filter by empaque - Primario rows have SKU='Todos', show for all
-        if (emp !== empaque && sku !== 'Todos') continue;
-        // For Primario, use 'Todos' SKU under each real SKU
-        var skuKey = sku === 'Todos' ? '_primario_' : sku;
-        if (!skus[skuKey]) skus[skuKey] = { lb: 'SIG 2 ' + (sku === 'Todos' ? 'Primario' : sku), it: [] };
+        // Solo incluir filas que coincidan con el empaque seleccionado
+        if (emp !== empaque) continue;
+        // Para Primario todos van bajo una sola clave
+        var skuKey = empaque === 'Primario' ? 'Todos los formatos' : sku;
+        var skuLabel = empaque === 'Primario' ? 'SIG 2 - Todos los formatos' : 'SIG 2 ' + sku;
+        if (!skus[skuKey]) skus[skuKey] = { lb: skuLabel, it: [] };
         skus[skuKey].it.push({ n: num, nm: nm, eq: eq || undefined, r: ref === '' ? null : ref, d: desc });
       }
-      // If Primario, merge all into one group
-      if (empaque === 'Primario') {
-        LN.sig2.sk = { 'Todos los formatos': { lb: 'SIG 2 - Todos los formatos', it: skus['_primario_'] ? skus['_primario_'].it : [] } };
-      } else {
-        LN.sig2.sk = {};
-        Object.keys(skus).forEach(function(k){ if(k !== '_primario_') LN.sig2.sk[k] = skus[k]; });
-      }
+      LN.sig2.sk = {};
+      Object.keys(skus).forEach(function(k){ LN.sig2.sk[k] = skus[k]; });
       callback();
     })
     .catch(function(e){ console.warn('Error cargando CL SIG2:', e); callback(); });
