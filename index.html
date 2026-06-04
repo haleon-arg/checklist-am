@@ -133,7 +133,7 @@
     <div class="cd"><div class="ct">Datos del turno</div>
       <div class="fg">
         <div class="fi"><label>Linea de produccion</label><select id="cll" onchange="onLC()"><option value="">Seleccionar linea</option><option value="boato1">Boato 1</option><option value="boato2">Boato 2</option><option value="marchesini">Marchesini</option><option value="sig2">SIG 2</option><option value="corega">Corega</option></select></div>
-        <div class="fi" id="emp-field"><label>Empaque</label><select id="cl-emp"><option value="Sec">Secundario</option><option value="Prim">Primario</option></select></div><div class="fi" id="maq-field" style="display:none"><label>Maquina</label><select id="cl-maq" onchange="onMaqC()"><option value="">Seleccionar maquina</option><option value="alimentador">Alimentador de Pomos</option><option value="llenadora">Llenadora L-109</option><option value="estuchadora">Estuchadora SC4</option><option value="agrupador">Agrupador y Cerradora</option></select></div>
+        <div class="fi" id="emp-field"><label>Empaque</label><select id="cl-emp" onchange="onEmpaqueSIG2Change()"><option value="Sec">Secundario</option><option value="Prim">Primario</option></select></div><div class="fi" id="maq-field" style="display:none"><label>Maquina</label><select id="cl-maq" onchange="onMaqC()"><option value="">Seleccionar maquina</option><option value="alimentador">Alimentador de Pomos</option><option value="llenadora">Llenadora L-109</option><option value="estuchadora">Estuchadora SC4</option><option value="agrupador">Agrupador y Cerradora</option></select></div>
         <div class="fi" id="sf2" style="display:none"><label>SKU</label><select id="sk" onchange="onSC()"><option value="">Seleccionar SKU</option></select></div>
         <div class="fi"><label>Turno</label><select id="clt"><option value="">Seleccionar turno</option><option>TM — Manana (06:00 - 14:00)</option><option>TT — Tarde (14:00 - 22:00)</option><option>TN — Noche (22:00 - 06:00)</option></select></div>
         <div class="fi" style="display:none"><label>Fecha</label><input type="date" id="clf"/></div>
@@ -325,6 +325,27 @@ function loadSIG2FromSheets(empaque, callback) {
       callback();
     })
     .catch(function(e){ console.warn('Error cargando CL SIG2:', e); callback(); });
+}
+
+function onEmpaqueSIG2Change() {
+  var lSel = document.getElementById('cl-ln');
+  if (!lSel || lSel.value !== 'sig2') return;
+  // Trigger sig2 reload with new empaque
+  var empSel = document.getElementById('cl-emp');
+  var empVal = empSel ? empSel.value : 'Sec';
+  var empaqueVal = (empVal === 'Prim' || empVal === 'Primario') ? 'Primario' : 'Secundario';
+  loadSIG2FromSheets(empaqueVal, function(){
+    document.getElementById('cll3').innerHTML='';
+    CI=[];
+    var skSel=document.getElementById('sk');
+    skSel.innerHTML='<option value="">Seleccionar SKU</option>';
+    Object.keys(LN.sig2.sk).forEach(function(k){
+      var opt=document.createElement('option');
+      opt.value=k;opt.textContent=LN.sig2.sk[k].lb;
+      skSel.appendChild(opt);
+    });
+    rCL();
+  });
 }
 
 var TOL=0.10,CV='home',CI=[],CL='',CV2={},CV3={},AR=[];
@@ -1121,8 +1142,7 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
   }document.getElementById('cll3').innerHTML='';if(l=='sig2'){
     var empSel = document.getElementById('cl-emp');
     var empVal = empSel ? empSel.value : 'Sec';
-    // Map Sec->Secundario, Prim->Primario
-    var empaqueVal = empVal === 'Prim' ? 'Primario' : 'Secundario';
+    var empaqueVal = (empVal === 'Prim' || empVal === 'Primario') ? 'Primario' : 'Secundario';
     loadSIG2FromSheets(empaqueVal, function(){
     document.getElementById('cll3').innerHTML='';
     CI=[];
