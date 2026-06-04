@@ -345,7 +345,7 @@ function loadToverFromSheets(callback) {
         if (!num || num === 'N° Punto') continue;
         items.push({ n: num, eq: eq || undefined, nm: nm, r: ref === '' ? null : ref, d: desc });
       }
-      LN.tover.sk = { 'Tover': { lb: 'Tover', it: items } };
+      LN.tover.sk = { 'Todos los formatos': { lb: 'Todos los formatos', it: items } };
       callback();
     })
     .catch(function(e){ console.warn('Error cargando CL Tover:', e); callback(); });
@@ -1174,16 +1174,19 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
       skSel.appendChild(opt);
     });
   }document.getElementById('cll3').innerHTML='';if(l=='tover'){
+    document.getElementById('sk').innerHTML='<option value="">Cargando...</option>';
     document.getElementById('cll3').innerHTML='';
     CI=[];
     loadToverFromSheets(function(){
-      // Auto-select single SKU and show points directly
-      var skSel=document.getElementById('sk');
-      skSel.innerHTML='<option value="Tover" selected>Tover</option>';
-      CI = LN.tover.sk['Tover'] ? LN.tover.sk['Tover'].it : [];
-      document.getElementById('clbl').textContent='Tover';
-      document.getElementById('clbp').textContent= CI.length + ' puntos';
-      rCL();
+      var sd = LN.tover.sk['Todos los formatos'];
+      if(sd){
+        CI = sd.it;
+        CL = sd.lb;
+        document.getElementById('sk').innerHTML='<option value="Todos los formatos" selected>Todos los formatos</option>';
+        document.getElementById('clbl').textContent='Tover';
+        document.getElementById('clbp').textContent= CI.length + ' puntos';
+        rCL();
+      }
     });
     return;
   }else if(l=='sig2'){
