@@ -132,7 +132,7 @@
   <div class="cn">
     <div class="cd"><div class="ct">Datos del turno</div>
       <div class="fg">
-        <div class="fi"><label>Linea de produccion</label><select id="cll" onchange="onLC()"><option value="">Seleccionar linea</option><option value="boato1">Boato 1</option><option value="boato2">Boato 2</option><option value="marchesini">Marchesini</option><option value="sig2">SIG 2</option><option value="corega">Corega</option></select></div>
+        <div class="fi"><label>Linea de produccion</label><select id="cll" onchange="onLC()"><option value="">Seleccionar linea</option><option value="boato1">Boato 1</option><option value="boato2">Boato 2</option><option value="marchesini">Marchesini</option><option value="sig2">SIG 2</option><option value="corega">Corega</option><option value="tover">Tover</option></select></div>
         <div class="fi" id="emp-field"><label>Empaque</label><select id="cl-emp" onchange="onEmpaqueSIG2Change()"><option value="Sec">Secundario</option><option value="Prim">Primario</option></select></div><div class="fi" id="maq-field" style="display:none"><label>Maquina</label><select id="cl-maq" onchange="onMaqC()"><option value="">Seleccionar maquina</option><option value="alimentador">Alimentador de Pomos</option><option value="llenadora">Llenadora L-109</option><option value="estuchadora">Estuchadora SC4</option><option value="agrupador">Agrupador y Cerradora</option></select></div>
         <div class="fi" id="sf2" style="display:none"><label>SKU</label><select id="sk" onchange="onSC()"><option value="">Seleccionar SKU</option></select></div>
         <div class="fi"><label>Turno</label><select id="clt"><option value="">Seleccionar turno</option><option>TM — Manana (06:00 - 14:00)</option><option>TT — Tarde (14:00 - 22:00)</option><option>TN — Noche (22:00 - 06:00)</option></select></div>
@@ -325,6 +325,30 @@ function loadSIG2FromSheets(empaque, callback) {
       callback();
     })
     .catch(function(e){ console.warn('Error cargando CL SIG2:', e); callback(); });
+}
+
+function loadToverFromSheets(callback) {
+  var url = 'https://script.google.com/macros/s/AKfycbxpEiyejk62kYrJlNhO2j9qlh1BqZw7hPRkDXokX0eueS8xAH0tfb2U0Y6Ja2rlJIxrGg/exec?action=get&sheet=CL_Tover&t=' + Date.now();
+  fetch(url, { method: 'GET', mode: 'cors' })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var rows = data.rows || [];
+      var items = [];
+      for (var i = 0; i < rows.length; i++) {
+        var cols = rows[i];
+        if (!cols || cols.length < 5) continue;
+        var num  = String(cols[0]).trim();
+        var eq   = String(cols[1]).trim();
+        var nm   = String(cols[2]).trim();
+        var ref  = String(cols[3]).trim();
+        var desc = String(cols[4]).trim();
+        if (!num || num === 'N° Punto') continue;
+        items.push({ n: num, eq: eq || undefined, nm: nm, r: ref === '' ? null : ref, d: desc });
+      }
+      LN.tover.sk = { 'Tover': { lb: 'Tover', it: items } };
+      callback();
+    })
+    .catch(function(e){ console.warn('Error cargando CL Tover:', e); callback(); });
 }
 
 function onEmpaqueSIG2Change() {
@@ -1135,7 +1159,7 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
   // For boato1/boato2/marchesini force Secundario only
   var empSel2 = document.getElementById('cl-emp');
   var primOpt = empSel2.querySelector('option[value="Prim"]');
-  if(l==='boato1'||l==='boato2'||l==='marchesini'){
+  if(l==='boato1'||l==='boato2'||l==='marchesini'||l==='tover'){
     if(primOpt) primOpt.style.display='none';
     empSel2.value='Sec';
   } else {
@@ -1149,7 +1173,24 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
       opt.value=k;opt.textContent=k;
       skSel.appendChild(opt);
     });
-  }document.getElementById('cll3').innerHTML='';if(l=='sig2'){
+  }document.getElementById('cll3').innerHTML='';if(l=='tover'){
+    document.getElementById('sk').innerHTML='<option value="">Cargando...</option>';
+    document.getElementById('cll3').innerHTML='';
+    CI=[];
+    loadToverFromSheets(function(){
+      var skSel=document.getElementById('sk');
+      skSel.innerHTML='<option value="">Seleccionar SKU</option>';
+      Object.keys(LN.tover.sk).forEach(function(k){
+        var opt=document.createElement('option');
+        opt.value=k;opt.textContent=LN.tover.sk[k].lb;
+        skSel.appendChild(opt);
+      });
+      document.getElementById('clbl').textContent='Tover';
+      document.getElementById('clbp').textContent='— puntos';
+      rCL();
+    });
+    return;
+  }else if(l=='sig2'){
     var empSel = document.getElementById('cl-emp');
     var empVal = empSel ? empSel.value : 'Sec';
     var empaqueVal = (empVal === 'Prim' || empVal === 'Primario') ? 'Primario' : 'Secundario';
