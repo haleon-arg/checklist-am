@@ -268,6 +268,32 @@ function loadBoato1FromSheets(callback) {
     });
 }
 
+function loadMarchesiniFromSheets(callback) {
+  var url = 'https://script.google.com/macros/s/AKfycbxpEiyejk62kYrJlNhO2j9qlh1BqZw7hPRkDXokX0eueS8xAH0tfb2U0Y6Ja2rlJIxrGg/exec?action=get&sheet=CL_Marchesini&t=' + Date.now();
+  fetch(url, { method: 'GET', mode: 'cors' })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var rows = data.rows || [];
+      var skus = {};
+      for (var i = 0; i < rows.length; i++) {
+        var cols = rows[i];
+        if (!cols || cols.length < 5) continue;
+        var sku  = String(cols[0]).trim();
+        var num  = String(cols[1]).trim();
+        var nm   = String(cols[2]).trim();
+        var ref  = String(cols[3]).trim();
+        var desc = String(cols[4]).trim();
+        if (!sku || sku === 'SKU') continue;
+        if (!skus[sku]) skus[sku] = { lb: sku, it: [] };
+        skus[sku].it.push({ n: num, nm: nm, r: ref === '' ? null : ref, d: desc });
+      }
+      LN.marchesini.sk = {};
+      Object.keys(skus).forEach(function(k){ LN.marchesini.sk[k] = skus[k]; });
+      callback();
+    })
+    .catch(function(e){ console.warn('Error cargando CL Marchesini:', e); callback(); });
+}
+
 var TOL=0.10,CV='home',CI=[],CL='',CV2={},CV3={},AR=[];
 var PW='https://raw.githubusercontent.com/haleon-arg/checklist-am/main/fotos/cilt/PW.jpg';
 var PA='https://raw.githubusercontent.com/haleon-arg/checklist-am/main/fotos/cilt/PA.jpg';
@@ -1059,7 +1085,22 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
       opt.value=k;opt.textContent=k;
       skSel.appendChild(opt);
     });
-  }document.getElementById('cll3').innerHTML='';if(l=='boato1'){loadBoato1FromSheets(function(){
+  }document.getElementById('cll3').innerHTML='';if(l=='marchesini'){loadMarchesiniFromSheets(function(){
+    document.getElementById('cll3').innerHTML='';
+    CI=[];
+    var skSel=document.getElementById('sk');
+    skSel.innerHTML='<option value="">Seleccionar SKU</option>';
+    Object.keys(LN.marchesini.sk).forEach(function(k){
+      var opt=document.createElement('option');
+      opt.value=k;opt.textContent=LN.marchesini.sk[k].lb;
+      skSel.appendChild(opt);
+    });
+    document.getElementById('clbl').textContent='Marchesini';
+    document.getElementById('clbp').textContent='— puntos';
+    rCL();
+  });
+  return;
+}else if(l=='boato1'){loadBoato1FromSheets(function(){
     document.getElementById('cll3').innerHTML='';
     CI=[];
     var skSel=document.getElementById('sk');
