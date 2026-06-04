@@ -1177,13 +1177,17 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
     document.getElementById('cll3').innerHTML='';
     CI=[];
     loadToverFromSheets(function(){
-      // Auto-select single SKU and show points directly
       var skSel=document.getElementById('sk');
       skSel.innerHTML='<option value="Tover" selected>Tover</option>';
-      CI = LN.tover.sk['Tover'] ? LN.tover.sk['Tover'].it : [];
-      document.getElementById('clbl').textContent='Tover';
-      document.getElementById('clbp').textContent= CI.length + ' puntos';
-      rCL();
+      // Load CI directly and render
+      var sd = LN.tover.sk['Tover'];
+      if(sd){
+        CI = sd.it;
+        CL = sd.lb;
+        document.getElementById('clbp').textContent = CI.length + ' puntos';
+        document.getElementById('clbl').textContent = 'Tover';
+        rCL();
+      }
     });
     return;
   }else if(l=='sig2'){
