@@ -294,6 +294,43 @@ function loadMarchesiniFromSheets(callback) {
     .catch(function(e){ console.warn('Error cargando CL Marchesini:', e); callback(); });
 }
 
+function loadSIG2FromSheets(empaque, callback) {
+  var url = 'https://script.google.com/macros/s/AKfycbxpEiyejk62kYrJlNhO2j9qlh1BqZw7hPRkDXokX0eueS8xAH0tfb2U0Y6Ja2rlJIxrGg/exec?action=get&sheet=CL_SIG2&t=' + Date.now();
+  fetch(url, { method: 'GET', mode: 'cors' })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var rows = data.rows || [];
+      var skus = {};
+      for (var i = 0; i < rows.length; i++) {
+        var cols = rows[i];
+        if (!cols || cols.length < 7) continue;
+        var sku      = String(cols[0]).trim();
+        var num      = String(cols[1]).trim();
+        var eq       = String(cols[2]).trim();
+        var nm       = String(cols[3]).trim();
+        var ref      = String(cols[4]).trim();
+        var desc     = String(cols[5]).trim();
+        var emp      = String(cols[6]).trim();
+        if (!sku || sku === 'SKU') continue;
+        // Filter by empaque - Primario rows have SKU='Todos', show for all
+        if (emp !== empaque && sku !== 'Todos') continue;
+        // For Primario, use 'Todos' SKU under each real SKU
+        var skuKey = sku === 'Todos' ? '_primario_' : sku;
+        if (!skus[skuKey]) skus[skuKey] = { lb: 'SIG 2 ' + (sku === 'Todos' ? 'Primario' : sku), it: [] };
+        skus[skuKey].it.push({ n: num, nm: nm, eq: eq || undefined, r: ref === '' ? null : ref, d: desc });
+      }
+      // If Primario, merge all into one group
+      if (empaque === 'Primario') {
+        LN.sig2.sk = { 'Todos los formatos': { lb: 'SIG 2 - Todos los formatos', it: skus['_primario_'] ? skus['_primario_'].it : [] } };
+      } else {
+        LN.sig2.sk = {};
+        Object.keys(skus).forEach(function(k){ if(k !== '_primario_') LN.sig2.sk[k] = skus[k]; });
+      }
+      callback();
+    })
+    .catch(function(e){ console.warn('Error cargando CL SIG2:', e); callback(); });
+}
+
 var TOL=0.10,CV='home',CI=[],CL='',CV2={},CV3={},AR=[];
 var PW='https://raw.githubusercontent.com/haleon-arg/checklist-am/main/fotos/cilt/PW.jpg';
 var PA='https://raw.githubusercontent.com/haleon-arg/checklist-am/main/fotos/cilt/PA.jpg';
@@ -1085,7 +1122,27 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
       opt.value=k;opt.textContent=k;
       skSel.appendChild(opt);
     });
-  }document.getElementById('cll3').innerHTML='';if(l=='marchesini'){loadMarchesiniFromSheets(function(){
+  }document.getElementById('cll3').innerHTML='';if(l=='sig2'){
+    var empSel = document.getElementById('cl-emp');
+    var empVal = empSel ? empSel.value : 'Sec';
+    // Map Sec->Secundario, Prim->Primario
+    var empaqueVal = empVal === 'Prim' ? 'Primario' : 'Secundario';
+    loadSIG2FromSheets(empaqueVal, function(){
+    document.getElementById('cll3').innerHTML='';
+    CI=[];
+    var skSel=document.getElementById('sk');
+    skSel.innerHTML='<option value="">Seleccionar SKU</option>';
+    Object.keys(LN.sig2.sk).forEach(function(k){
+      var opt=document.createElement('option');
+      opt.value=k;opt.textContent=LN.sig2.sk[k].lb;
+      skSel.appendChild(opt);
+    });
+    document.getElementById('clbl').textContent='SIG 2';
+    document.getElementById('clbp').textContent='— puntos';
+    rCL();
+  });
+  return;
+}else if(l=='marchesini'){loadMarchesiniFromSheets(function(){
     document.getElementById('cll3').innerHTML='';
     CI=[];
     var skSel=document.getElementById('sk');
