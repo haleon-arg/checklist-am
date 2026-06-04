@@ -330,14 +330,15 @@ function loadSIG2FromSheets(empaque, callback) {
 function onEmpaqueSIG2Change() {
   var lSel = document.getElementById('cll');
   if (!lSel || lSel.value !== 'sig2') return;
-  // Trigger sig2 reload with new empaque
+  // Clear immediately to avoid showing stale SKUs
+  var skSel = document.getElementById('sk');
+  skSel.innerHTML = '<option value="">Cargando...</option>';
+  document.getElementById('cll3').innerHTML = '';
+  CI = [];
   var empSel = document.getElementById('cl-emp');
   var empVal = empSel ? empSel.value : 'Sec';
   var empaqueVal = (empVal === 'Prim' || empVal === 'Primario') ? 'Primario' : 'Secundario';
   loadSIG2FromSheets(empaqueVal, function(){
-    document.getElementById('cll3').innerHTML='';
-    CI=[];
-    var skSel=document.getElementById('sk');
     skSel.innerHTML='<option value="">Seleccionar SKU</option>';
     Object.keys(LN.sig2.sk).forEach(function(k){
       var opt=document.createElement('option');
@@ -1143,9 +1144,11 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
     var empSel = document.getElementById('cl-emp');
     var empVal = empSel ? empSel.value : 'Sec';
     var empaqueVal = (empVal === 'Prim' || empVal === 'Primario') ? 'Primario' : 'Secundario';
-    loadSIG2FromSheets(empaqueVal, function(){
+    // Clear immediately
+    document.getElementById('sk').innerHTML='<option value="">Cargando...</option>';
     document.getElementById('cll3').innerHTML='';
     CI=[];
+    loadSIG2FromSheets(empaqueVal, function(){
     var skSel=document.getElementById('sk');
     skSel.innerHTML='<option value="">Seleccionar SKU</option>';
     Object.keys(LN.sig2.sk).forEach(function(k){
@@ -1213,7 +1216,23 @@ function onSC(){
   var sd;
   if(l==='corega'){var maq=document.getElementById('cl-maq').value;if(!maq||!COREGA_DATA[maq]||!COREGA_DATA[maq].sk[s]){document.getElementById('cll3').innerHTML='';return;}sd=COREGA_DATA[maq].sk[s];}else{sd=LN[l].sk[s];}
   CI=sd.it;CL=sd.lb;document.getElementById('clbp').textContent=CI.length+' puntos';document.getElementById('clbl').textContent=CL;rCL();}
-function chk(i,v){var r=CI[i].r;if(!r)return'nd';var nv=parseFloat(v.replace(',','.')),nr=parseFloat(r);if(isNaN(nv))return'nd';return Math.abs(nv-nr)/nr<=TOL?'ok':'nok';}
+function chk(i,v){
+  var r=CI[i].r;
+  if(!r)return'nd';
+  var nv=parseFloat(v.replace(',','.'));
+  if(isNaN(nv))return'nd';
+  // Check if reference is a range like "40-70"
+  var rangeParts = String(r).match(/^(-?[\d.]+)-(-?[\d.]+)$/);
+  if(rangeParts){
+    var rMin=parseFloat(rangeParts[1]), rMax=parseFloat(rangeParts[2]);
+    if(rMin>rMax){var tmp=rMin;rMin=rMax;rMax=tmp;}
+    return (nv>=rMin && nv<=rMax)?'ok':'nok';
+  }
+  // Single value with tolerance
+  var nr=parseFloat(r);
+  if(isNaN(nr))return'nd';
+  return Math.abs(nv-nr)/nr<=TOL?'ok':'nok';
+}
 function rCL(){var c=document.getElementById('cll3');c.innerHTML='';var lastEq='';for(var i=0;i<CI.length;i++){var it=CI[i];if(it.eq&&it.eq!==lastEq){var gh=document.createElement('div');gh.style.cssText='font-size:11px;font-weight:600;color:#0C447C;text-transform:uppercase;letter-spacing:0.5px;padding:10px 0 4px;border-bottom:1px solid #E2E0D8;margin-bottom:4px;margin-top:8px;';gh.textContent=it.eq;c.appendChild(gh);lastEq=it.eq;}var it=CI[i],iC=it.r===null,row=document.createElement('div');row.className='cr';row.id='cr'+i;var ct=iC?'<select class="vs" id="cv'+i+'" data-i="'+i+'" onchange="sCS(this)"><option value="">Seleccionar</option><option value="OK">OK</option><option value="NO OK">NO OK</option></select>':'<input class="vi" type="text" id="cv'+i+'" data-i="'+i+'" placeholder="Valor" oninput="sCV(this)"/>';row.innerHTML='<span class="cn2">'+it.n+'</span><div class="ci2"><div class="cn3">'+(it.nm||it.nombre||'')+'</div><div class="cr2">Ref: <strong>'+it.d+'</strong></div></div><div class="cw">'+ct+'<span class="sl em" id="cl'+i+'">'+(iC?'seleccionar':'valor medido')+'</span></div>';c.appendChild(row);}uCP();}
 function sCS(el){var i=parseInt(el.getAttribute('data-i')),v=el.value;CV2[i]=v;var lb=document.getElementById('cl'+i),rw=document.getElementById('cr'+i);if(!v){el.className='vs';lb.className='sl em';lb.textContent='seleccionar';rw.className='cr';}else if(v=='OK'){el.className='vs ok';lb.className='sl ok';lb.textContent='OK';rw.className='cr rok';}else{el.className='vs nk';lb.className='sl nk';lb.textContent='NO OK';rw.className='cr rnk';}uCP();}
 function sCV(el){var i=parseInt(el.getAttribute('data-i')),v=el.value.trim();CV2[i]=v;var lb=document.getElementById('cl'+i),rw=document.getElementById('cr'+i);if(!v){el.className='vi';lb.className='sl em';lb.textContent='valor medido';rw.className='cr';}else{var st=chk(i,v);if(st=='ok'){el.className='vi ok';lb.className='sl ok';lb.textContent='OK';rw.className='cr rok';}else if(st=='nk'||st=='nok'){el.className='vi nk';lb.className='sl nk';lb.textContent='FUERA DE RANGO';rw.className='cr rnk';}else{el.className='vi ok';lb.className='sl ok';lb.textContent='Registrado';rw.className='cr rok';}}uCP();}
