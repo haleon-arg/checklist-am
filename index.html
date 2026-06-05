@@ -241,16 +241,18 @@ function loadBoato1FromSheets(callback) {
       // rows: [sku, num, nombre, referencia, descripcion]
       for (var i = 0; i < rows.length; i++) {
         var cols = rows[i];
-        if (!cols || cols.length < 5) continue;
+        if (!cols || cols.length < 6) continue;
         var sku  = String(cols[0]).trim();
         var num  = String(cols[1]).trim();
-        var nm   = String(cols[2]).trim();
-        var ref  = String(cols[3]).trim();
-        var desc = String(cols[4]).trim();
+        var eq   = String(cols[2]).trim();
+        var nm   = String(cols[3]).trim();
+        var ref  = String(cols[4]).trim();
+        var desc = String(cols[5]).trim();
         if (!sku || sku === 'SKU') continue;
         if (!skus[sku]) skus[sku] = { lb: 'Boato 1 ' + sku, it: [] };
         skus[sku].it.push({
           n: num,
+          eq: eq || undefined,
           nm: nm,
           r: ref === '' ? null : ref,
           d: desc
@@ -307,12 +309,13 @@ function loadMarchesiniFromSheets(callback) {
         if (!cols || cols.length < 5) continue;
         var sku  = String(cols[0]).trim();
         var num  = String(cols[1]).trim();
-        var nm   = String(cols[2]).trim();
-        var ref  = String(cols[3]).trim();
-        var desc = String(cols[4]).trim();
+        var eq   = String(cols[2]).trim();
+        var nm   = String(cols[3]).trim();
+        var ref  = String(cols[4]).trim();
+        var desc = String(cols[5]).trim();
         if (!sku || sku === 'SKU') continue;
         if (!skus[sku]) skus[sku] = { lb: sku, it: [] };
-        skus[sku].it.push({ n: num, nm: nm, r: ref === '' ? null : ref, d: desc });
+        skus[sku].it.push({ n: num, eq: eq||undefined, nm: nm, r: ref===''?null:ref, d: desc });
       }
       LN.marchesini.sk = {};
       Object.keys(skus).forEach(function(k){ LN.marchesini.sk[k] = skus[k]; });
