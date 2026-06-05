@@ -1194,7 +1194,7 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
     empSel2.value='Sec';
   } else {
     if(primOpt) primOpt.style.display='';
-  }document.getElementById('maq-field').style.display=isCorega?'':'none';document.getElementById('sf2').style.display=(l=='boato1'||l=='marchesini'||l=='sig2'||l=='corega'||l=='tover')?'':'none';document.getElementById('sk').value='';var hmiBtn2=document.getElementById('hmi-btn-field');if(hmiBtn2)hmiBtn2.style.display='none';
+  }document.getElementById('maq-field').style.display=isCorega?'':'none';document.getElementById('sf2').style.display=(l=='boato1'||l=='boato2'||l=='marchesini'||l=='sig2'||l=='corega'||l=='tover')?'':'none';document.getElementById('sk').value='';var hmiBtn2=document.getElementById('hmi-btn-field');if(hmiBtn2)hmiBtn2.style.display='none';
   var skSel=document.getElementById('sk');
   skSel.innerHTML='<option value="">Seleccionar SKU</option>';
   if(l==='corega'){var maq=document.getElementById('cl-maq').value;if(maq&&COREGA_DATA[maq]){Object.keys(COREGA_DATA[maq].sk).forEach(function(k){var opt=document.createElement('option');opt.value=k;opt.textContent=COREGA_DATA[maq].sk[k].lb;skSel.appendChild(opt);});}}else if(l&&LN[l]&&LN[l].sk){
