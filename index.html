@@ -133,7 +133,7 @@
     <div class="cd"><div class="ct">Datos del turno</div>
       <div class="fg">
         <div class="fi"><label>Linea de produccion</label><select id="cll" onchange="onLC()"><option value="">Seleccionar linea</option><option value="boato1">Boato 1</option><option value="boato2">Boato 2</option><option value="marchesini">Marchesini</option><option value="sig1">SIG 1</option><option value="sig2">SIG 2</option><option value="corega">Corega</option><option value="tover">Tover</option></select></div>
-        <div class="fi" id="emp-field"><label>Empaque</label><select id="cl-emp" onchange="onEmpaqueSIG2Change()"><option value="Sec">Secundario</option><option value="Prim">Primario</option></select></div><div class="fi" id="maq-field" style="display:none"><label>Maquina</label><select id="cl-maq" onchange="onMaqC()"><option value="">Seleccionar maquina</option><option value="alimentador">Alimentador de Pomos</option><option value="llenadora">Llenadora L-109</option><option value="estuchadora">Estuchadora SC4</option><option value="agrupador">Agrupador y Cerradora</option></select></div>
+        <div class="fi" id="emp-field"><label>Empaque</label><select id="cl-emp" onchange="onEmpaqueChange()"><option value="Sec">Secundario</option><option value="Prim">Primario</option></select></div><div class="fi" id="maq-field" style="display:none"><label>Maquina</label><select id="cl-maq" onchange="onMaqC()"><option value="">Seleccionar maquina</option><option value="alimentador">Alimentador de Pomos</option><option value="llenadora">Llenadora L-109</option><option value="estuchadora">Estuchadora SC4</option><option value="agrupador">Agrupador y Cerradora</option></select></div>
         <div class="fi" id="sf2" style="display:none"><label>SKU</label><select id="sk" onchange="onSC()"><option value="">Seleccionar SKU</option></select></div><div class="fi" id="fq-toggle" style="display:none"><label>Control diario</label><select id="fq-sel" onchange="rCL()"><option value="SI" selected>SI</option><option value="">Todos</option></select></div>
         <div class="fi"><label>Turno</label><select id="clt"><option value="">Seleccionar turno</option><option>TM — Manana (06:00 - 14:00)</option><option>TT — Tarde (14:00 - 22:00)</option><option>TN — Noche (22:00 - 06:00)</option></select></div>
         <div class="fi" style="display:none"><label>Fecha</label><input type="date" id="clf"/></div>
@@ -420,9 +420,31 @@ function loadToverFromSheets(callback) {
     .catch(function(e){ console.warn('Error cargando CL Tover:', e); callback(); });
 }
 
-function onEmpaqueSIG2Change() {
+function onEmpaqueChange() {
   var lSel = document.getElementById('cll');
-  if (!lSel || lSel.value !== 'sig2') return;
+  var lVal = lSel ? lSel.value : '';
+  var empSel = document.getElementById('cl-emp');
+  var empVal = empSel ? empSel.value : 'Sec';
+  var empaqueVal = (empVal === 'Prim' || empVal === 'Primario') ? 'Primario' : 'Secundario';
+
+  if (lVal === 'boato1') {
+    document.getElementById('sk').innerHTML = '<option value="">Cargando...</option>';
+    document.getElementById('cll3').innerHTML = '';
+    CI = [];
+    loadBoato1FromSheets(empaqueVal, function(){
+      var skSel = document.getElementById('sk');
+      skSel.innerHTML = '<option value="">Seleccionar SKU</option>';
+      Object.keys(LN.boato1.sk).forEach(function(k){
+        var opt = document.createElement('option');
+        opt.value = k; opt.textContent = LN.boato1.sk[k].lb;
+        skSel.appendChild(opt);
+      });
+      rCL();
+    });
+    return;
+  }
+
+  if (!lSel || lVal !== 'sig2') return;
   // Clear immediately to avoid showing stale SKUs
   var skSel = document.getElementById('sk');
   skSel.innerHTML = '<option value="">Cargando...</option>';
@@ -1228,19 +1250,6 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
   // For boato1/boato2/marchesini force Secundario only
   var empSel2 = document.getElementById('cl-emp');
   // fq-toggle controlled by each line handler
-  // Reload boato1 if selected
-  var lSel2 = document.getElementById('cll');
-  if(lSel2 && lSel2.value==='boato1'){
-    document.getElementById('sk').innerHTML='<option value="">Cargando...</option>';
-    loadBoato1FromSheets(empSel2.value==='Prim'?'Primario':'Secundario', function(){
-      var skSel=document.getElementById('sk');
-      skSel.innerHTML='<option value="">Seleccionar SKU</option>';
-      Object.keys(LN.boato1.sk).forEach(function(k){
-        var opt=document.createElement('option'); opt.value=k; opt.textContent=LN.boato1.sk[k].lb; skSel.appendChild(opt);
-      });
-      rCL();
-    });
-  }
   var primOpt = empSel2.querySelector('option[value="Prim"]');
   if(primOpt) primOpt.style.display='';document.getElementById('maq-field').style.display=isCorega?'':'none';document.getElementById('sf2').style.display=(l=='boato1'||l=='boato2'||l=='marchesini'||l=='sig1'||l=='sig2'||l=='corega'||l=='tover')?'':'none';document.getElementById('sk').value='';var hmiBtn2=document.getElementById('hmi-btn-field');if(hmiBtn2)hmiBtn2.style.display='none';
   var skSel=document.getElementById('sk');
