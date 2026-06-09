@@ -1227,7 +1227,7 @@ function hideSup(){document.getElementById('sv').style.display='none';if(CV=='ho
 function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(l==='corega');document.getElementById('emp-field').style.display=isCorega?'none':'';
   // For boato1/boato2/marchesini force Secundario only
   var empSel2 = document.getElementById('cl-emp');
-  var fqDiv2=document.getElementById('fq-toggle'); if(fqDiv2) fqDiv2.style.display='none';
+  // fq-toggle controlled by each line handler
   // Reload boato1 if selected
   var lSel2 = document.getElementById('cll');
   if(lSel2 && lSel2.value==='boato1'){
