@@ -1231,7 +1231,6 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
   // Reload boato1 if selected
   var lSel2 = document.getElementById('cll');
   if(lSel2 && lSel2.value==='boato1'){
-    var empB1r = (l2==='Prim'||empSel2.value==='Prim')?'Primario':'Secundario';
     document.getElementById('sk').innerHTML='<option value="">Cargando...</option>';
     loadBoato1FromSheets(empSel2.value==='Prim'?'Primario':'Secundario', function(){
       var skSel=document.getElementById('sk');
