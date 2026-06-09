@@ -273,7 +273,7 @@ function loadBoato1FromSheets(empaque, callback) {
     });
 }
 
-function loadBoato2FromSheets(callback) {
+function loadBoato2FromSheets(empaque, callback) {
   var url = 'https://script.google.com/macros/s/AKfycbwNK75UQi5ozjmECBG5SP73hDygYyMBE217QaQ8cyS6feLLgyKXdWNqiGZmqaOsf7fOLA/exec?action=get&sheet=CL_Boato2&t=' + Date.now();
   fetch(url, { method: 'GET', mode: 'cors' })
     .then(function(r){ return r.json(); })
@@ -289,7 +289,9 @@ function loadBoato2FromSheets(callback) {
         var nm   = String(cols[3]).trim();
         var ref  = String(cols[4]).trim();
         var desc = String(cols[5]).trim();
+        var emp  = cols[6] ? String(cols[6]).trim() : '';
         if (!sku || sku === 'SKU') continue;
+        if (empaque && emp && emp !== empaque) continue;
         if (!skus[sku]) skus[sku] = { lb: sku, it: [] };
         var diario = cols[7] ? String(cols[7]).trim().toUpperCase() : 'NO';
         skus[sku].it.push({ n: num, eq: eq||undefined, nm: nm, r: ref===''?null:ref, d: desc , cd: diario });
@@ -427,16 +429,18 @@ function onEmpaqueChange() {
   var empVal = empSel ? empSel.value : 'Sec';
   var empaqueVal = (empVal === 'Prim' || empVal === 'Primario') ? 'Primario' : 'Secundario';
 
-  if (lVal === 'boato1') {
+  if (lVal === 'boato1' || lVal === 'boato2') {
+    var loadFn = lVal === 'boato1' ? loadBoato1FromSheets : loadBoato2FromSheets;
+    var lnKey = lVal === 'boato1' ? LN.boato1 : LN.boato2;
     document.getElementById('sk').innerHTML = '<option value="">Cargando...</option>';
     document.getElementById('cll3').innerHTML = '';
     CI = [];
-    loadBoato1FromSheets(empaqueVal, function(){
+    loadFn(empaqueVal, function(){
       var skSel = document.getElementById('sk');
       skSel.innerHTML = '<option value="">Seleccionar SKU</option>';
-      Object.keys(LN.boato1.sk).forEach(function(k){
+      Object.keys(lnKey.sk).forEach(function(k){
         var opt = document.createElement('option');
-        opt.value = k; opt.textContent = LN.boato1.sk[k].lb;
+        opt.value = k; opt.textContent = lnKey.sk[k].lb;
         skSel.appendChild(opt);
       });
       rCL();
@@ -1355,10 +1359,11 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
   });
   return;
 }else if(l=='boato2'){
+    var empB2 = document.getElementById('cl-emp') ? (document.getElementById('cl-emp').value==='Prim'?'Primario':'Secundario') : 'Secundario';
     document.getElementById('sk').innerHTML='<option value="">Cargando...</option>';
     document.getElementById('cll3').innerHTML='';
     CI=[];
-    loadBoato2FromSheets(function(){
+    loadBoato2FromSheets(empB2, function(){
       var skSel=document.getElementById('sk');
       skSel.innerHTML='<option value="">Seleccionar SKU</option>';
       Object.keys(LN.boato2.sk).forEach(function(k){
