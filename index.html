@@ -230,7 +230,7 @@ var SU="https://script.google.com/macros/s/AKfycbwNK75UQi5ozjmECBG5SP73hDygYyMBE
 var CL_BOATO1_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRI7ozZHepo97flMLj9GZ-_rn8h6wrGoojbO_ExCxPcZjm2ih4eE5QoazEVMfiWfXOvRhNlYHKIPOEc/pub?gid=627242545&single=true&output=csv';
 // LN_BOATO1_LOADED removed - always fetch fresh
 
-function loadBoato1FromSheets(callback) {
+function loadBoato1FromSheets(empaque, callback) {
   // Lee via Apps Script (evita CORS de Zscaler)
   var url = SU + '?action=get&sheet=CL_Boato1&t=' + Date.now();
   fetch(url, { method: 'GET', mode: 'cors' })
@@ -248,7 +248,9 @@ function loadBoato1FromSheets(callback) {
         var nm   = String(cols[3]).trim();
         var ref  = String(cols[4]).trim();
         var desc = String(cols[5]).trim();
+        var emp  = cols[6] ? String(cols[6]).trim() : '';
         if (!sku || sku === 'SKU') continue;
+        if (empaque && emp && emp !== empaque) continue;
         if (!skus[sku]) skus[sku] = { lb: 'Boato 1 ' + sku, it: [] };
         var diario = cols[7] ? String(cols[7]).trim().toUpperCase() : 'NO';
         skus[sku].it.push({
@@ -1226,13 +1228,22 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
   // For boato1/boato2/marchesini force Secundario only
   var empSel2 = document.getElementById('cl-emp');
   var fqDiv2=document.getElementById('fq-toggle'); if(fqDiv2) fqDiv2.style.display='none';
+  // Reload boato1 if selected
+  var lSel2 = document.getElementById('cll');
+  if(lSel2 && lSel2.value==='boato1'){
+    var empB1r = (l2==='Prim'||empSel2.value==='Prim')?'Primario':'Secundario';
+    document.getElementById('sk').innerHTML='<option value="">Cargando...</option>';
+    loadBoato1FromSheets(empSel2.value==='Prim'?'Primario':'Secundario', function(){
+      var skSel=document.getElementById('sk');
+      skSel.innerHTML='<option value="">Seleccionar SKU</option>';
+      Object.keys(LN.boato1.sk).forEach(function(k){
+        var opt=document.createElement('option'); opt.value=k; opt.textContent=LN.boato1.sk[k].lb; skSel.appendChild(opt);
+      });
+      rCL();
+    });
+  }
   var primOpt = empSel2.querySelector('option[value="Prim"]');
-  if(l==='boato1'||l==='boato2'||l==='marchesini'||l==='tover'||l==='sig1'){
-    if(primOpt) primOpt.style.display='none';
-    empSel2.value='Sec';
-  } else {
-    if(primOpt) primOpt.style.display='';
-  }document.getElementById('maq-field').style.display=isCorega?'':'none';document.getElementById('sf2').style.display=(l=='boato1'||l=='boato2'||l=='marchesini'||l=='sig1'||l=='sig2'||l=='corega'||l=='tover')?'':'none';document.getElementById('sk').value='';var hmiBtn2=document.getElementById('hmi-btn-field');if(hmiBtn2)hmiBtn2.style.display='none';
+  if(primOpt) primOpt.style.display='';document.getElementById('maq-field').style.display=isCorega?'':'none';document.getElementById('sf2').style.display=(l=='boato1'||l=='boato2'||l=='marchesini'||l=='sig1'||l=='sig2'||l=='corega'||l=='tover')?'':'none';document.getElementById('sk').value='';var hmiBtn2=document.getElementById('hmi-btn-field');if(hmiBtn2)hmiBtn2.style.display='none';
   var skSel=document.getElementById('sk');
   skSel.innerHTML='<option value="">Seleccionar SKU</option>';
   if(l==='corega'){var maq=document.getElementById('cl-maq').value;if(maq&&COREGA_DATA[maq]){Object.keys(COREGA_DATA[maq].sk).forEach(function(k){var opt=document.createElement('option');opt.value=k;opt.textContent=COREGA_DATA[maq].sk[k].lb;skSel.appendChild(opt);});}}else if(l&&LN[l]&&LN[l].sk){
