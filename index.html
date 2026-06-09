@@ -250,13 +250,14 @@ function loadBoato1FromSheets(callback) {
         var desc = String(cols[5]).trim();
         if (!sku || sku === 'SKU') continue;
         if (!skus[sku]) skus[sku] = { lb: 'Boato 1 ' + sku, it: [] };
-        skus[sku].it.push({
+        skus[sku]var diario = cols[7] ? String(cols[7]).trim().toUpperCase() : 'NO';
+        .it.push({
           n: num,
           eq: eq || undefined,
           nm: nm,
           r: ref === '' ? null : ref,
           d: desc
-        });
+        , cd: diario });
       }
       LN.boato1.sk = {};
       Object.keys(skus).forEach(function(k){
@@ -288,7 +289,8 @@ function loadBoato2FromSheets(callback) {
         var desc = String(cols[5]).trim();
         if (!sku || sku === 'SKU') continue;
         if (!skus[sku]) skus[sku] = { lb: sku, it: [] };
-        skus[sku].it.push({ n: num, eq: eq||undefined, nm: nm, r: ref===''?null:ref, d: desc });
+        skus[sku]var diario = cols[7] ? String(cols[7]).trim().toUpperCase() : 'NO';
+        .it.push({ n: num, eq: eq||undefined, nm: nm, r: ref===''?null:ref, d: desc , cd: diario });
       }
       LN.boato2.sk = {};
       Object.keys(skus).forEach(function(k){ LN.boato2.sk[k] = skus[k]; });
@@ -315,7 +317,8 @@ function loadSIG1FromSheets(callback) {
         var desc = String(cols[5]).trim();
         if (!sku || sku === 'SKU') continue;
         if (!skus[sku]) skus[sku] = { lb: sku, it: [] };
-        skus[sku].it.push({ n: num, eq: eq||undefined, nm: nm, r: ref===''?null:ref, d: desc });
+        skus[sku]var diario = cols[7] ? String(cols[7]).trim().toUpperCase() : 'NO';
+        .it.push({ n: num, eq: eq||undefined, nm: nm, r: ref===''?null:ref, d: desc , cd: diario });
       }
       if (!LN.sig1) LN.sig1 = { lb: 'SIG 1', sk: {} };
       LN.sig1.sk = {};
@@ -343,7 +346,8 @@ function loadMarchesiniFromSheets(callback) {
         var desc = String(cols[5]).trim();
         if (!sku || sku === 'SKU') continue;
         if (!skus[sku]) skus[sku] = { lb: sku, it: [] };
-        skus[sku].it.push({ n: num, eq: eq||undefined, nm: nm, r: ref===''?null:ref, d: desc });
+        skus[sku]var diario = cols[7] ? String(cols[7]).trim().toUpperCase() : 'NO';
+        .it.push({ n: num, eq: eq||undefined, nm: nm, r: ref===''?null:ref, d: desc , cd: diario });
       }
       LN.marchesini.sk = {};
       Object.keys(skus).forEach(function(k){ LN.marchesini.sk[k] = skus[k]; });
@@ -404,7 +408,8 @@ function loadToverFromSheets(callback) {
         var desc = String(cols[5]).trim();
         if (!sku || sku === 'SKU') continue;
         if (!skus[sku]) skus[sku] = { lb: sku, it: [] };
-        skus[sku].it.push({ n: num, eq: eq || undefined, nm: nm, r: ref === '' ? null : ref, d: desc });
+        skus[sku]var diario = cols[7] ? String(cols[7]).trim().toUpperCase() : 'NO';
+        .it.push({ n: num, eq: eq || undefined, nm: nm, r: ref === '' ? null : ref, d: desc , cd: diario });
       }
       LN.tover.sk = {};
       Object.keys(skus).forEach(function(k){ LN.tover.sk[k] = skus[k]; });
@@ -1249,6 +1254,8 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
       });
       document.getElementById('clbl').textContent='Tover';
       document.getElementById('clbp').textContent='— puntos';
+      var fqDiv=document.getElementById('fq-toggle'); if(fqDiv) fqDiv.style.display='';
+      document.getElementById('fq-sel').value='SI';
       rCL();
     });
     return;
@@ -1266,6 +1273,8 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
       });
       document.getElementById('clbl').textContent='SIG 1';
       document.getElementById('clbp').textContent='— puntos';
+      var fqDiv=document.getElementById('fq-toggle'); if(fqDiv) fqDiv.style.display='';
+      document.getElementById('fq-sel').value='SI';
       rCL();
     });
     return;
@@ -1304,6 +1313,8 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
     });
     document.getElementById('clbl').textContent='Marchesini';
     document.getElementById('clbp').textContent='— puntos';
+    var fqDiv=document.getElementById('fq-toggle'); if(fqDiv) fqDiv.style.display='';
+    document.getElementById('fq-sel').value='SI';
     rCL();
   });
   return;
@@ -1319,6 +1330,8 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
     });
     document.getElementById('clbl').textContent='Boato 1';
     document.getElementById('clbp').textContent='— puntos';
+    var fqDiv=document.getElementById('fq-toggle'); if(fqDiv) fqDiv.style.display='';
+    document.getElementById('fq-sel').value='SI';
     rCL();
   });
   return;
@@ -1336,6 +1349,8 @@ function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(
       });
       document.getElementById('clbl').textContent='Boato 2';
       document.getElementById('clbp').textContent='— puntos';
+      var fqDiv=document.getElementById('fq-toggle'); if(fqDiv) fqDiv.style.display='';
+      document.getElementById('fq-sel').value='SI';
       rCL();
     });
     return;
