@@ -233,25 +233,25 @@ var CILT_BOATO1_DATA = {};
 
 function loadCILTBoato1(callback) {
   if(CILT_BOATO1_LOADED) { callback(CILT_BOATO1_DATA); return; }
-  var url = 'https://docs.google.com/spreadsheets/d/' + CILT_SHEET_ID + '/gviz/tq?tqx=out:json&sheet=CILT_Boato1';
+  var url = 'https://docs.google.com/spreadsheets/d/' + CILT_SHEET_ID + '/export?format=csv&sheet=CILT_Boato1';
   fetch(url)
     .then(function(r){ return r.text(); })
     .then(function(txt){
       try{
-        var json = JSON.parse(txt.substr(47).slice(0,-2));
-        var rows = json.table.rows;
+        var lines = txt.trim().split('\n');
         var diario = [], semanal = [];
-        for(var i=0; i<rows.length; i++){
-          var r = rows[i].c;
-          if(!r||!r[0]||!r[0].v) continue;
+        for(var i=1; i<lines.length; i++){
+          var cols = lines[i].split(',');
+          if(cols.length<5) continue;
+          var unq = function(s){return s?s.replace(/^"|"$/g,'').replace(/""/g,'"').trim():'';};
           var item = {
-            n: r[0]?r[0].v:i+1,
-            eq: r[1]?r[1].v:'',
-            nm: r[2]?r[2].v:'',
-            ds: r[3]?r[3].v:'',
-            foto: r[5]?r[5].v:null
+            n: unq(cols[0]),
+            eq: unq(cols[1]),
+            nm: unq(cols[2]),
+            ds: unq(cols.slice(3, cols.length-2).join(',')),
+            foto: unq(cols[cols.length-1])
           };
-          var frec = r[4]?r[4].v:'';
+          var frec = unq(cols[cols.length-2]);
           if(frec==='semanal') semanal.push(item);
           else diario.push(item);
         }
