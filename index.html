@@ -41,7 +41,7 @@
   .hk{background:var(--wh);border:1px solid var(--br);border-radius:var(--r);padding:32px 24px;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;}
   .hk:hover{border-color:var(--gb);background:var(--gl);}
   .hi{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;}
-  .hi.cl{background:var(--bl);}.hi.ci{background:var(--gl);}.hi.ts{background:#FFF3F3;}
+  .hi.cl{background:var(--bl);}.hi.ci{background:var(--gl);}.hi.ts{background:#FFF3F3;}.hi.ef{background:#FDF1D6;}
   .hk h2{font-size:20px;font-weight:600;color:var(--tx);}
   .hk p{font-size:13px;color:var(--mu);line-height:1.5;}
   .cr{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--br);}
@@ -126,6 +126,7 @@
     <div class="hk" onclick="goTo('cl')"><div class="hi cl"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><h2>CL</h2><p>Centerline<br/>Revision diaria de parametros</p></div>
     <div class="hk" onclick="goTo('cilt')"><div class="hi ci"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#27500A" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div><h2>CILT</h2><p>Limpieza, Inspeccion,<br/>Lubricacion y Ajuste</p></div>
     <div class="hk" onclick="window.open('boato_troubleshooting.html','_blank')"><div class="hi ts"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><h2>Solucion de Problemas</h2><p>Asistente tecnico<br/>Boato 2 · Troubleshooting</p></div>
+    <div class="hk" onclick="goTo('efic')"><div class="hi ef"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B8720C" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/><path d="M12 2v3"/></svg></div><h2>Eficiencia</h2><p>Eficiencia de Elaboracion<br/>Inicio y fin de lote</p></div>
   </div>
 </div>
 <div id="cl-view" style="display:none">
@@ -177,6 +178,46 @@
     <div class="cd"><div class="ct">CILT <span class="bg3" id="cilt-badge-pts">— puntos</span> <span class="bg2" id="cilt-badge-ln">Seleccionar linea</span></div><div class="pt"><div class="pf" id="citb" style="width:0%"></div></div><div class="pl" id="citl2">0 de 20 completados</div></div>
     <div class="cd" id="citl3"></div>
     <div class="cd"><div class="ct">Confirmar turno</div><div class="sr"><input class="si" type="text" id="citf2" placeholder="Ingresa tu nombre para confirmar"/><button class="bs" id="cits" onclick="subCILT()">Confirmar CILT</button></div><div class="sm" id="citsm">Guardando...</div><div class="sb" id="citsb"></div><div class="eb" id="citeb"></div></div>
+  </div>
+</div>
+<div id="efic-view" style="display:none">
+  <div class="cn">
+    <div class="cd">
+      <div class="ct">Datos del lote <span class="bg3" id="efBadge">Sin iniciar</span></div>
+      <div class="fg">
+        <div class="fi"><label>Etapa</label><select id="efEtapa"><option value="">Seleccionar etapa</option><option value="carga">Carga</option><option value="mezcla">Mezcla</option><option value="descarga">Descarga</option></select></div>
+        <div class="fi"><label>Fecha</label><input class="si" type="date" id="eff"/></div>
+      </div>
+    </div>
+    <div class="cd">
+      <div class="ct">Registro del lote</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="bs" id="ef-ini-btn" onclick="efMark('ini')">▶ Inicio de Lote</button>
+        <button class="bs" id="ef-fin-btn" onclick="efMark('fin')" style="background:var(--bb);border-color:var(--bd)" disabled>⏹ Fin de Lote</button>
+        <button class="bs" id="ef-com-btn" onclick="efToggleComment()" style="background:var(--wh);color:var(--tx);border-color:var(--br)">💬 Comentarios</button>
+      </div>
+      <div id="efLiveClock" style="display:none;text-align:center;margin-bottom:18px;background:var(--gl);border:1px solid var(--gb);border-radius:var(--rs);padding:14px;">
+        <div id="efClockNum" style="font-size:34px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--gd);letter-spacing:1px;">00:00:00</div>
+        <div id="efClockLabel" style="font-size:12px;color:var(--mu);margin-top:2px;">Tiempo de elaboracion en curso</div>
+      </div>
+      <div class="fg">
+        <div class="fi"><label>Hora de inicio</label><input class="si" type="time" id="efHoraIni" onchange="efCalcDur()"/></div>
+        <div class="fi"><label>Hora de fin</label><input class="si" type="time" id="efHoraFin" onchange="efCalcDur()"/></div>
+      </div>
+      <div id="efComentBox" style="display:none;margin-top:12px">
+        <div class="fi"><label>Comentarios</label><textarea id="efComent" rows="3" style="width:100%;border:1px solid var(--br);border-radius:var(--rs);padding:8px 12px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--tx);"></textarea></div>
+      </div>
+      <div id="efDurBox" style="display:none;margin-top:14px;background:var(--gl);border:1px solid var(--gb);border-radius:var(--rs);padding:12px 16px;">
+        <span style="font-size:13px;color:var(--gd);font-weight:600;">Duracion de elaboracion: <span id="efDur" style="font-family:'IBM Plex Mono',monospace;"></span></span>
+      </div>
+    </div>
+    <div class="cd">
+      <div class="ct">Confirmar registro</div>
+      <div class="sr"><input class="si" type="text" id="eff2" placeholder="Ingresa tu nombre para confirmar"/><button class="bs" id="efs" onclick="subEF()">Confirmar Eficiencia</button></div>
+      <div class="sm" id="efsm">Guardando...</div>
+      <div class="sb" id="efsb"></div>
+      <div class="eb" id="efeb"></div>
+    </div>
   </div>
 </div>
 <div id="sv" class="sv">
@@ -1212,7 +1253,7 @@ var CILT=[
 {n:19,eq:'Final de linea',nm:'Cerradora y codificador de cajas',ds:'Verificar que los rodillos no tengan cinta adherida. Verificar que el codificador no pierda tinta. Limpiar cabezal.'},
 {n:20,eq:'Final de linea',nm:'Aparejo neumatico (elevador de cajas)',ds:'Verificar que las ventosas no presenten rajaduras. Verificar posicion correcta para la caja. Comprobar funcionamiento.'}
 ];
-function goTo(v){setTimeout(function(){window.scrollTo(0,0);document.body.scrollTop=0;document.documentElement.scrollTop=0;},10);['hv','cl-view','cilt-view'].forEach(function(x){document.getElementById(x).style.display='none';});document.getElementById(v+'-view').style.display='block';document.getElementById('bi').style.display='inline-block';document.getElementById('bsv').style.display='inline-block';CV=v;document.getElementById('ht').textContent=v=='cl'?'Centerline':'CILT Diario';if(v=='cl'){
+function goTo(v){setTimeout(function(){window.scrollTo(0,0);document.body.scrollTop=0;document.documentElement.scrollTop=0;},10);['hv','cl-view','cilt-view','efic-view'].forEach(function(x){document.getElementById(x).style.display='none';});document.getElementById(v+'-view').style.display='block';document.getElementById('bi').style.display='inline-block';document.getElementById('bsv').style.display='inline-block';CV=v;document.getElementById('ht').textContent=v=='cl'?'Centerline':v=='cilt'?'CILT Diario':v=='efic'?'Eficiencia de Elaboracion':'';if(v=='cl'){
     document.getElementById('clf').value=(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
     document.getElementById('cll').value='';
     document.getElementById('clt').value='';
@@ -1246,9 +1287,31 @@ function goTo(v){setTimeout(function(){window.scrollTo(0,0);document.body.scroll
     document.getElementById('cilt-badge-pts').textContent='— puntos';
     document.getElementById('citl2').textContent='Selecciona una linea para comenzar';
     document.getElementById('citb').style.width='0%';
+  }if(v=='efic'){
+    document.getElementById('eff').value=(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
+    document.getElementById('efEtapa').value='';
+    document.getElementById('efHoraIni').value='';
+    document.getElementById('efHoraFin').value='';
+    document.getElementById('efComent').value='';
+    document.getElementById('efComentBox').style.display='none';
+    document.getElementById('efDurBox').style.display='none';
+    document.getElementById('efDur').textContent='';
+    document.getElementById('eff2').value='';
+    document.getElementById('efs').disabled=false;
+    document.getElementById('efsm').style.display='none';
+    document.getElementById('efsb').style.display='none';
+    document.getElementById('efeb').style.display='none';
+    document.getElementById('ef-ini-btn').disabled=false;
+    document.getElementById('ef-fin-btn').disabled=true;
+    document.getElementById('efBadge').textContent='Sin iniciar';
+    if(efTimerInt){clearInterval(efTimerInt);efTimerInt=null;}
+    efStartDate=null;
+    document.getElementById('efLiveClock').style.display='none';
+    document.getElementById('efClockNum').textContent='00:00:00';
+    document.getElementById('efClockLabel').textContent='Tiempo de elaboracion en curso';
   }}
-function goHome(){setTimeout(function(){window.scrollTo(0,0);document.body.scrollTop=0;document.documentElement.scrollTop=0;},10);['cl-view','cilt-view'].forEach(function(x){document.getElementById(x).classList.remove('ac');});document.getElementById('sv').style.display='none';document.getElementById('hv').style.display='block';document.getElementById('bsv').style.display='none';document.getElementById('bi').style.display='none';document.getElementById('ht').textContent='Mantenimiento Autonomo';CV='home';}
-function showSup(){['hv','cl-view','cilt-view'].forEach(function(x){document.getElementById(x).style.display='none';});document.getElementById('sv').style.display='block';loadD();}
+function goHome(){setTimeout(function(){window.scrollTo(0,0);document.body.scrollTop=0;document.documentElement.scrollTop=0;},10);['cl-view','cilt-view','efic-view'].forEach(function(x){document.getElementById(x).style.display='none';});document.getElementById('sv').style.display='none';document.getElementById('hv').style.display='block';document.getElementById('bsv').style.display='none';document.getElementById('bi').style.display='none';document.getElementById('ht').textContent='Mantenimiento Autonomo';CV='home';}
+function showSup(){['hv','cl-view','cilt-view','efic-view'].forEach(function(x){document.getElementById(x).style.display='none';});document.getElementById('sv').style.display='block';loadD();}
 function hideSup(){document.getElementById('sv').style.display='none';if(CV=='home'){document.getElementById('hv').style.display='block';document.getElementById('bsv').style.display='none';document.getElementById('bi').style.display='none';document.getElementById('ht').textContent='Mantenimiento Autonomo';}else document.getElementById(CV+'-view').style.display='block';}
 function onLC(){var l=document.getElementById('cll').value;CV2={};var isCorega=(l==='corega');document.getElementById('emp-field').style.display=isCorega?'none':'';
   // For boato1/boato2/marchesini force Secundario only
@@ -1565,6 +1628,68 @@ function subCILT(){var t=document.getElementById('citt').value,f=document.getEle
   if(d<activeIt.length&&!confirm('Faltan '+(activeIt.length-d)+' puntos. Confirmar igual?'))return;
   var h=new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),rows=[];
   for(var i=0;i<activeIt.length;i++){var it=activeIt[i],e=(CV3[i]&&CV3[i].e)||'Sin completar',o=(CV3[i]&&CV3[i].o)||'';rows.push(['CILT',f,t,lineaLabel,fm,it.num,it.nombre,'',e,e,o,h]);}sD('cit',rows);}
+var efTimerInt=null,efStartDate=null;
+function efMark(tipo){
+  var now=new Date(),hh=String(now.getHours()).padStart(2,'0'),mm=String(now.getMinutes()).padStart(2,'0'),hora=hh+':'+mm;
+  if(tipo==='ini'){
+    document.getElementById('efHoraIni').value=hora;
+    document.getElementById('ef-ini-btn').disabled=true;
+    document.getElementById('ef-fin-btn').disabled=false;
+    document.getElementById('efBadge').textContent='En elaboracion';
+    efStartDate=now;
+    document.getElementById('efLiveClock').style.display='block';
+    document.getElementById('efClockLabel').textContent='Tiempo de elaboracion en curso';
+    efUpdateClock();
+    if(efTimerInt) clearInterval(efTimerInt);
+    efTimerInt=setInterval(efUpdateClock,1000);
+  }else{
+    document.getElementById('efHoraFin').value=hora;
+    document.getElementById('ef-fin-btn').disabled=true;
+    document.getElementById('efBadge').textContent='Lote finalizado';
+    if(efTimerInt){clearInterval(efTimerInt);efTimerInt=null;}
+    efUpdateClock();
+    document.getElementById('efClockLabel').textContent='Tiempo total de elaboracion';
+    efCalcDur();
+  }
+}
+function efUpdateClock(){
+  if(!efStartDate) return;
+  var diff=Math.floor((new Date()-efStartDate)/1000);
+  if(diff<0) diff=0;
+  var hh=String(Math.floor(diff/3600)).padStart(2,'0'),mm=String(Math.floor((diff%3600)/60)).padStart(2,'0'),ss=String(diff%60).padStart(2,'0');
+  document.getElementById('efClockNum').textContent=hh+':'+mm+':'+ss;
+}
+function efCalcDur(){
+  var ini=document.getElementById('efHoraIni').value,fin=document.getElementById('efHoraFin').value;
+  if(!ini||!fin){document.getElementById('efDurBox').style.display='none';return;}
+  var p1=ini.split(':'),p2=fin.split(':');
+  var mi=(+p1[0])*60+(+p1[1]),mf=(+p2[0])*60+(+p2[1]),dur=mf-mi;
+  if(dur<0) dur+=1440;
+  var h=Math.floor(dur/60),m=dur%60;
+  document.getElementById('efDur').textContent=(h>0?h+'h ':'')+m+'min';
+  document.getElementById('efDurBox').style.display='block';
+}
+function efToggleComment(){
+  var b=document.getElementById('efComentBox');
+  b.style.display=(b.style.display==='none')?'block':'none';
+}
+function subEF(){
+  var etapa=document.getElementById('efEtapa').value,f=document.getElementById('eff').value,ini=document.getElementById('efHoraIni').value,fin=document.getElementById('efHoraFin').value,com=document.getElementById('efComent').value.trim(),nom=document.getElementById('eff2').value.trim();
+  if(!etapa||!f||!nom){alert('Completa la etapa, la fecha y tu nombre.');return;}
+  if(!ini){alert('Registra la hora de inicio de lote.');return;}
+  var fFmt=(function(d){var p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0];})(f);
+  var dur=document.getElementById('efDur').textContent||'';
+  var etLbMap={carga:'Carga',mezcla:'Mezcla',descarga:'Descarga'};
+  var etLb=etLbMap[etapa]||etapa;
+  var rows=[['EFICIENCIA',fFmt,etLb,ini,fin,dur,com,nom]];
+  var bn=document.getElementById('efs'),sm=document.getElementById('efsm'),sb=document.getElementById('efsb'),eb=document.getElementById('efeb');
+  bn.disabled=true;sm.style.display='block';eb.style.display='none';
+  fetch(SU,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({sheet:'Eficiencia_Elaboracion',rows:rows})}).then(function(){
+    sm.style.display='none';sb.style.display='block';sb.textContent='Eficiencia de elaboracion confirmada y guardada correctamente.';
+  }).catch(function(){
+    sm.style.display='none';bn.disabled=false;eb.style.display='block';eb.textContent='Error al guardar. Verifica la conexion.';
+  });
+}
 function sD(tp,rows){var bn=document.getElementById(tp=='cl'?'cls':'cits'),sm=document.getElementById(tp+'sm'),sb=document.getElementById(tp+'sb'),eb=document.getElementById(tp+'eb');bn.disabled=true;sm.style.display='block';eb.style.display='none';fetch(SU,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({rows:rows})}).then(function(){sm.style.display='none';sb.style.display='block';sb.textContent=(tp=='cl'?'Centerline':'CILT')+' confirmado y guardado correctamente.';}).catch(function(){sm.style.display='none';bn.disabled=false;eb.style.display='block';eb.textContent='Error al guardar. Verifica la conexion.';});}
 function loadD(){
   document.getElementById('stb').innerHTML='<tr><td colspan="15" class="lm">Cargando...</td></tr>';
