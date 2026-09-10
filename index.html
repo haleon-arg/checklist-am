@@ -20,6 +20,7 @@
   .bg1{font-size:11px;font-weight:500;padding:2px 9px;border-radius:99px;background:var(--bl);color:var(--bd);}
   .bg2{font-size:11px;font-weight:500;padding:2px 9px;border-radius:99px;background:var(--bg);color:var(--mu);border:1px solid var(--br);}
   .bg3{font-size:11px;font-weight:500;padding:2px 9px;border-radius:99px;background:var(--gl);color:var(--gd);}
+  .bg4{font-size:11px;font-weight:500;padding:2px 9px;border-radius:99px;background:#FDF1D6;color:#B8720C;}
   .fg{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   @media(max-width:480px){.fg{grid-template-columns:1fr;}}
   .fi{display:flex;flex-direction:column;gap:5px;}
@@ -242,7 +243,7 @@
           <option value="2026-11">Noviembre 2026</option>
           <option value="2026-12">Diciembre 2026</option>
         </select>
-        <input type="date" id="ff" onchange="rT()"/><select id="ft" onchange="rT()"><option value="">CL y CILT</option><option value="CL">Solo CL</option><option value="CILT">Solo CILT</option></select><select id="fl" onchange="rT()">
+        <input type="date" id="ff" onchange="rT()"/><select id="ft" onchange="rT()"><option value="">Todos los tipos</option><option value="CL">Solo CL</option><option value="CILT">Solo CILT</option><option value="EFICIENCIA">Solo Eficiencia</option></select><select id="fl" onchange="rT()">
           <option value="">Todas las lineas</option>
           <option value="Boato 1">Boato 1</option>
           <option value="Boato 2">Boato 2</option>
@@ -259,7 +260,7 @@
           <option value="Diario">Diario</option>
           <option value="Semanal">Semanal</option>
         </select><input type="text" id="fsku" placeholder="SKU (ej: x12)" oninput="rT()" style="height:36px;border:1px solid var(--br);border-radius:var(--rs);padding:0 10px;font-size:13px;background:var(--wh);color:var(--tx);width:110px;"/><select id="ftu" onchange="rT()"><option value="">Todos los turnos</option><option>TM — Manana (06:00 - 14:00)</option><option>TT — Tarde (14:00 - 22:00)</option><option>TN — Noche (22:00 - 06:00)</option></select></div>
-      <div class="tw"><table><thead><tr><th>Tipo</th><th>Fecha</th><th>Turno</th><th>Linea</th><th>Empaque</th><th>Frecuencia</th><th>SKU</th><th>Operador</th><th>N</th><th>Punto</th><th>Ref</th><th>Valor</th><th>Estado</th><th>Obs</th><th>Hora</th></tr></thead><tbody id="stb"><tr><td colspan="15" class="lm">Presiona Actualizar.</td></tr></tbody></table></div>
+      <div class="tw"><table><thead><tr><th>Tipo</th><th>Fecha</th><th>Turno</th><th>Linea</th><th>Empaque</th><th>Frecuencia</th><th>SKU</th><th>Operador</th><th>N</th><th>Punto</th><th>Ref</th><th>Valor</th><th>Estado</th><th>Obs</th><th>Hora</th><th>Etapa</th><th>Hora Inicio</th><th>Hora Fin</th><th>Duracion</th><th>Comentarios</th></tr></thead><tbody id="stb"><tr><td colspan="20" class="lm">Presiona Actualizar.</td></tr></tbody></table></div>
     </div>
   </div>
 </div>
@@ -1681,7 +1682,7 @@ function subEF(){
   var dur=document.getElementById('efDur').textContent||'';
   var etLbMap={carga:'Carga',mezcla:'Mezcla',descarga:'Descarga'};
   var etLb=etLbMap[etapa]||etapa;
-  var rows=[['EFICIENCIA',fFmt,etLb,ini,fin,dur,com,nom]];
+  var rows=[['EFICIENCIA',fFmt,'','',nom,'','','','','','',(fin||ini),etLb,ini,fin,dur,com]];
   var bn=document.getElementById('efs'),sm=document.getElementById('efsm'),sb=document.getElementById('efsb'),eb=document.getElementById('efeb');
   bn.disabled=true;sm.style.display='block';eb.style.display='none';
   fetch(SU,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({sheet:'Eficiencia_Elaboracion',rows:rows})}).then(function(){
@@ -1692,7 +1693,7 @@ function subEF(){
 }
 function sD(tp,rows){var bn=document.getElementById(tp=='cl'?'cls':'cits'),sm=document.getElementById(tp+'sm'),sb=document.getElementById(tp+'sb'),eb=document.getElementById(tp+'eb');bn.disabled=true;sm.style.display='block';eb.style.display='none';fetch(SU,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({rows:rows})}).then(function(){sm.style.display='none';sb.style.display='block';sb.textContent=(tp=='cl'?'Centerline':'CILT')+' confirmado y guardado correctamente.';}).catch(function(){sm.style.display='none';bn.disabled=false;eb.style.display='block';eb.textContent='Error al guardar. Verifica la conexion.';});}
 function loadD(){
-  document.getElementById('stb').innerHTML='<tr><td colspan="15" class="lm">Cargando...</td></tr>';
+  document.getElementById('stb').innerHTML='<tr><td colspan="20" class="lm">Cargando...</td></tr>';
   fetch(SU+'?action=get',{method:'GET',mode:'cors'})
     .then(function(r){
       if(!r.ok) throw new Error('HTTP '+r.status);
@@ -1719,7 +1720,7 @@ function loadD(){
     })
     .catch(function(e){
       console.error('Error:',e);
-      document.getElementById('stb').innerHTML='<tr><td colspan="15" class="em">Error al cargar. Verifica que el Apps Script este publicado correctamente.</td></tr>';
+      document.getElementById('stb').innerHTML='<tr><td colspan="20" class="em">Error al cargar. Verifica que el Apps Script este publicado correctamente.</td></tr>';
     });
 }
 
@@ -1785,11 +1786,12 @@ function rT(){var ff=document.getElementById('ff').value,ft=document.getElementB
     if(ffrec&&_px.frec!==ffrec) lineaOk=false;
     if(fsku&&_px.sku.toLowerCase().indexOf(fsku)===-1) lineaOk=false;
     return fechaOk&&(!ff||r[1]==ffFmt||r[1]==ff)&&(!ft||r[0]==ft)&&lineaOk&&(!ftu||r[2]==ftu);
-  });var ok=fr.filter(function(r){return r[9]==='OK'||r[9]==='HECHO';}).length,nk=fr.filter(function(r){return r[9]==='NO OK'||r[9]==='NO HECHO';}).length,p=(ok+nk)>0?Math.round(ok/(ok+nk)*100):0;document.getElementById('kt').textContent=fr.length;document.getElementById('ko').textContent=ok;document.getElementById('kn').textContent=nk;document.getElementById('kp').textContent=(ok+nk)>0?p+'%':'—';var tb=document.getElementById('stb');if(!fr.length){tb.innerHTML='<tr><td colspan="15" class="em">No hay registros.</td></tr>';return;}tb.innerHTML=fr.map(function(r){var rs=r[9],pl=rs==='OK'||rs==='HECHO'?'<span class="pi pok">'+rs+'</span>':rs==='NO OK'||rs==='NO HECHO'?'<span class="pi pnk">'+rs+'</span>':'<span class="pi pnd">—</span>';var tp=r[0]==='CL'?'<span class="bg1">CL</span>':'<span class="bg3">CILT</span>';var fecha=String(r[1]||'').substring(0,10);
+  });var ok=fr.filter(function(r){return r[9]==='OK'||r[9]==='HECHO';}).length,nk=fr.filter(function(r){return r[9]==='NO OK'||r[9]==='NO HECHO';}).length,p=(ok+nk)>0?Math.round(ok/(ok+nk)*100):0;document.getElementById('kt').textContent=fr.length;document.getElementById('ko').textContent=ok;document.getElementById('kn').textContent=nk;document.getElementById('kp').textContent=(ok+nk)>0?p+'%':'—';var tb=document.getElementById('stb');if(!fr.length){tb.innerHTML='<tr><td colspan="20" class="em">No hay registros.</td></tr>';return;}tb.innerHTML=fr.map(function(r){var rs=r[9],pl=rs==='OK'||rs==='HECHO'?'<span class="pi pok">'+rs+'</span>':rs==='NO OK'||rs==='NO HECHO'?'<span class="pi pnk">'+rs+'</span>':'<span class="pi pnd">—</span>';var fecha=String(r[1]||'').substring(0,10);
     var turno=String(r[2]||'').split(' ')[0];
-    var tipo=r[0]==='CL'?'<span class="bg1">CL</span>':'<span class="bg3">CILT</span>';
-    var parsed=parseLineaLabel(r[3]);
-    return'<tr><td>'+tipo+'</td><td>'+fecha+'</td><td>'+turno+'</td><td>'+parsed.linea+'</td><td>'+parsed.emp+'</td><td>'+parsed.frec+'</td><td>'+parsed.sku+'</td><td>'+(r[4]||'')+'</td><td class="mo">'+(r[5]||'')+'</td><td>'+(r[6]||'')+'</td><td class="mo">'+(r[7]||'')+'</td><td class="mo">'+(r[8]||'')+'</td><td>'+pl+'</td><td>'+(r[10]||'')+'</td><td class="mo">'+(r[11]||'')+'</td></tr>';}).join('');}
+    var esEf=r[0]==='EFICIENCIA';
+    var tipo=esEf?'<span class="bg4">EFIC</span>':(r[0]==='CL'?'<span class="bg1">CL</span>':'<span class="bg3">CILT</span>');
+    var parsed=esEf?{linea:'',emp:'',frec:'',sku:''}:parseLineaLabel(r[3]);
+    return'<tr><td>'+tipo+'</td><td>'+fecha+'</td><td>'+turno+'</td><td>'+parsed.linea+'</td><td>'+parsed.emp+'</td><td>'+parsed.frec+'</td><td>'+parsed.sku+'</td><td>'+(r[4]||'')+'</td><td class="mo">'+(r[5]||'')+'</td><td>'+(r[6]||'')+'</td><td class="mo">'+(r[7]||'')+'</td><td class="mo">'+(r[8]||'')+'</td><td>'+(esEf?'':pl)+'</td><td>'+(r[10]||'')+'</td><td class="mo">'+(r[11]||'')+'</td><td>'+(r[12]||'')+'</td><td class="mo">'+(r[13]||'')+'</td><td class="mo">'+(r[14]||'')+'</td><td class="mo">'+(r[15]||'')+'</td><td>'+(r[16]||'')+'</td></tr>';}).join('');}
 function expXL(){var ff=document.getElementById('ff').value,ft=document.getElementById('ft').value,fl=document.getElementById('fl').value,femp=document.getElementById('femp').value,ffrec=document.getElementById('ffrec').value,fsku=document.getElementById('fsku').value.trim().toLowerCase(),ftu=document.getElementById('ftu').value;var fm=document.getElementById('fmes').value;
   var fr=AR.filter(function(r){
     var fechaOk=true;
@@ -1823,9 +1825,11 @@ function expXL(){var ff=document.getElementById('ff').value,ft=document.getEleme
     return fechaOk&&(!ff||r[1]==ffFmt||r[1]==ff)&&(!ft||r[0]==ft)&&lineaOk2&&(!ftu||r[2]==ftu);
   });
   var frFixed=fr.map(function(r){
-    var p=parseLineaLabel(r[3]);return [r[0],String(r[1]||'').substring(0,10),String(r[2]||'').split(' ')[0],p.linea,p.emp,p.frec,p.sku,r[4],r[5],r[6],r[7],r[8],r[9],r[10],r[11]];
+    var esEf=r[0]==='EFICIENCIA';
+    var p=esEf?{linea:'',emp:'',frec:'',sku:''}:parseLineaLabel(r[3]);
+    return [r[0],String(r[1]||'').substring(0,10),String(r[2]||'').split(' ')[0],p.linea,p.emp,p.frec,p.sku,r[4],r[5],r[6],r[7],r[8],r[9],r[10],r[11],r[12]||'',r[13]||'',r[14]||'',r[15]||'',r[16]||''];
   });
-  var wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet([['Tipo','Fecha','Turno','Linea','Empaque','Frecuencia','SKU','Operador','N','Punto','Ref','Valor','Estado','Obs','Hora']].concat(frFixed));ws['!cols']=[{wch:6},{wch:12},{wch:10},{wch:18},{wch:18},{wch:6},{wch:35},{wch:10},{wch:12},{wch:10},{wch:20},{wch:8}];XLSX.utils.book_append_sheet(wb,ws,'Registros');XLSX.writeFile(wb,'MA_Haleon_'+(ff||'todos')+'.xlsx');}
+  var wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet([['Tipo','Fecha','Turno','Linea','Empaque','Frecuencia','SKU','Operador','N','Punto','Ref','Valor','Estado','Obs','Hora','Etapa','Hora Inicio','Hora Fin','Duracion','Comentarios']].concat(frFixed));ws['!cols']=[{wch:6},{wch:12},{wch:10},{wch:18},{wch:18},{wch:6},{wch:35},{wch:10},{wch:12},{wch:10},{wch:20},{wch:8},{wch:10},{wch:20},{wch:8},{wch:12},{wch:10},{wch:10},{wch:10},{wch:35}];XLSX.utils.book_append_sheet(wb,ws,'Registros');XLSX.writeFile(wb,'MA_Haleon_'+(ff||'todos')+'.xlsx');}
 </script>
 
 <div id="hmi-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;flex-direction:column;">
