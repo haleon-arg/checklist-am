@@ -219,6 +219,15 @@
       <div class="sb" id="efsb"></div>
       <div class="eb" id="efeb"></div>
     </div>
+    <div class="cd">
+      <div class="ct">Registros guardados en este equipo <span class="bg2" id="efLocalCount">0</span></div>
+      <div style="font-size:12px;color:var(--mu);margin-bottom:12px;">Se acumulan en este navegador. Exportalos a Excel cuando quieras, sin depender de ningun servidor.</div>
+      <div class="tw"><table><thead><tr><th>Fecha</th><th>Etapa</th><th>Hora Inicio</th><th>Hora Fin</th><th>Duracion</th><th>Comentarios</th><th>Operador</th></tr></thead><tbody id="efLocalBody"><tr><td colspan="7" class="lm">Todavia no hay registros guardados en este equipo.</td></tr></tbody></table></div>
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+        <button class="be" onclick="expEFLocal()">Exportar a Excel</button>
+        <button class="bb2" onclick="clearEFLocal()">Vaciar registros de este equipo</button>
+      </div>
+    </div>
   </div>
 </div>
 <div id="sv" class="sv">
@@ -260,7 +269,7 @@
           <option value="Diario">Diario</option>
           <option value="Semanal">Semanal</option>
         </select><input type="text" id="fsku" placeholder="SKU (ej: x12)" oninput="rT()" style="height:36px;border:1px solid var(--br);border-radius:var(--rs);padding:0 10px;font-size:13px;background:var(--wh);color:var(--tx);width:110px;"/><select id="ftu" onchange="rT()"><option value="">Todos los turnos</option><option>TM — Manana (06:00 - 14:00)</option><option>TT — Tarde (14:00 - 22:00)</option><option>TN — Noche (22:00 - 06:00)</option></select></div>
-      <div class="tw"><table><thead><tr><th>Tipo</th><th>Fecha</th><th>Turno</th><th>Linea</th><th>Empaque</th><th>Frecuencia</th><th>SKU</th><th>Operador</th><th>N</th><th>Punto</th><th>Ref</th><th>Valor</th><th>Estado</th><th>Obs</th><th>Hora</th><th>Etapa</th><th>Hora Inicio</th><th>Hora Fin</th><th>Duracion</th><th>Comentarios</th></tr></thead><tbody id="stb"><tr><td colspan="20" class="lm">Presiona Actualizar.</td></tr></tbody></table></div>
+      <div class="tw"><table id="stbl"><thead><tr><th>Tipo</th><th>Fecha</th><th class="col-cl">Turno</th><th class="col-cl">Linea</th><th class="col-cl">Empaque</th><th class="col-cl">Frecuencia</th><th class="col-cl">SKU</th><th>Operador</th><th class="col-cl">N</th><th class="col-cl">Punto</th><th class="col-cl">Ref</th><th class="col-cl">Valor</th><th class="col-cl">Estado</th><th class="col-cl">Obs</th><th>Hora</th><th class="col-ef">Etapa</th><th class="col-ef">Hora Inicio</th><th class="col-ef">Hora Fin</th><th class="col-ef">Duracion</th><th class="col-ef">Comentarios</th></tr></thead><tbody id="stb"><tr><td colspan="20" class="lm">Presiona Actualizar.</td></tr></tbody></table></div>
     </div>
   </div>
 </div>
@@ -1310,6 +1319,7 @@ function goTo(v){setTimeout(function(){window.scrollTo(0,0);document.body.scroll
     document.getElementById('efLiveClock').style.display='none';
     document.getElementById('efClockNum').textContent='00:00:00';
     document.getElementById('efClockLabel').textContent='Tiempo de elaboracion en curso';
+    efRenderLocalTable();
   }}
 function goHome(){setTimeout(function(){window.scrollTo(0,0);document.body.scrollTop=0;document.documentElement.scrollTop=0;},10);['cl-view','cilt-view','efic-view'].forEach(function(x){document.getElementById(x).style.display='none';});document.getElementById('sv').style.display='none';document.getElementById('hv').style.display='block';document.getElementById('bsv').style.display='none';document.getElementById('bi').style.display='none';document.getElementById('ht').textContent='Mantenimiento Autonomo';CV='home';}
 function showSup(){['hv','cl-view','cilt-view','efic-view'].forEach(function(x){document.getElementById(x).style.display='none';});document.getElementById('sv').style.display='block';loadD();}
@@ -1660,6 +1670,37 @@ function efUpdateClock(){
   var hh=String(Math.floor(diff/3600)).padStart(2,'0'),mm=String(Math.floor((diff%3600)/60)).padStart(2,'0'),ss=String(diff%60).padStart(2,'0');
   document.getElementById('efClockNum').textContent=hh+':'+mm+':'+ss;
 }
+function efGetLocal(){
+  try{return JSON.parse(localStorage.getItem('efRecords')||'[]');}catch(e){return [];}
+}
+function efSaveLocal(rec){
+  var list=efGetLocal();
+  list.push(rec);
+  localStorage.setItem('efRecords',JSON.stringify(list));
+  efRenderLocalTable();
+}
+function efRenderLocalTable(){
+  var list=efGetLocal(),tb=document.getElementById('efLocalBody');
+  document.getElementById('efLocalCount').textContent=list.length;
+  if(!list.length){tb.innerHTML='<tr><td colspan="7" class="lm">Todavia no hay registros guardados en este equipo.</td></tr>';return;}
+  tb.innerHTML=list.slice().reverse().map(function(r){
+    return '<tr><td>'+(r.fecha||'')+'</td><td>'+(r.etapa||'')+'</td><td class="mo">'+(r.ini||'')+'</td><td class="mo">'+(r.fin||'')+'</td><td class="mo">'+(r.dur||'')+'</td><td>'+(r.com||'')+'</td><td>'+(r.nom||'')+'</td></tr>';
+  }).join('');
+}
+function expEFLocal(){
+  var list=efGetLocal();
+  if(!list.length){alert('Todavia no hay registros guardados en este equipo para exportar.');return;}
+  var rows=list.map(function(r){return [r.fecha,r.etapa,r.ini,r.fin,r.dur,r.com,r.nom];});
+  var wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet([['Fecha','Etapa','Hora Inicio','Hora Fin','Duracion','Comentarios','Operador']].concat(rows));
+  ws['!cols']=[{wch:12},{wch:12},{wch:10},{wch:10},{wch:10},{wch:35},{wch:16}];
+  XLSX.utils.book_append_sheet(wb,ws,'Eficiencia');
+  XLSX.writeFile(wb,'Eficiencia_Elaboracion_'+(new Date().toISOString().substring(0,10))+'.xlsx');
+}
+function clearEFLocal(){
+  if(!confirm('Esto borra los registros de Eficiencia guardados en este equipo (no afecta lo ya exportado). Continuar?')) return;
+  localStorage.removeItem('efRecords');
+  efRenderLocalTable();
+}
 function efCalcDur(){
   var ini=document.getElementById('efHoraIni').value,fin=document.getElementById('efHoraFin').value;
   if(!ini||!fin){document.getElementById('efDurBox').style.display='none';return;}
@@ -1683,12 +1724,13 @@ function subEF(){
   var etLbMap={carga:'Carga',mezcla:'Mezcla',descarga:'Descarga'};
   var etLb=etLbMap[etapa]||etapa;
   var rows=[['EFICIENCIA',fFmt,'','',nom,'','','','','','',(fin||ini),etLb,ini,fin,dur,com]];
+  efSaveLocal({fecha:fFmt,etapa:etLb,ini:ini,fin:fin,dur:dur,com:com,nom:nom});
   var bn=document.getElementById('efs'),sm=document.getElementById('efsm'),sb=document.getElementById('efsb'),eb=document.getElementById('efeb');
   bn.disabled=true;sm.style.display='block';eb.style.display='none';
   fetch(SU,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({sheet:'Eficiencia_Elaboracion',rows:rows})}).then(function(){
-    sm.style.display='none';sb.style.display='block';sb.textContent='Eficiencia de elaboracion confirmada y guardada correctamente.';
+    sm.style.display='none';sb.style.display='block';sb.textContent='Registro guardado en este equipo y enviado al servidor.';
   }).catch(function(){
-    sm.style.display='none';bn.disabled=false;eb.style.display='block';eb.textContent='Error al guardar. Verifica la conexion.';
+    sm.style.display='none';bn.disabled=false;eb.style.display='block';eb.textContent='No se pudo enviar al servidor, pero el registro ya quedo guardado en este equipo y podes exportarlo a Excel.';
   });
 }
 function sD(tp,rows){var bn=document.getElementById(tp=='cl'?'cls':'cits'),sm=document.getElementById(tp+'sm'),sb=document.getElementById(tp+'sb'),eb=document.getElementById(tp+'eb');bn.disabled=true;sm.style.display='block';eb.style.display='none';fetch(SU,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({rows:rows})}).then(function(){sm.style.display='none';sb.style.display='block';sb.textContent=(tp=='cl'?'Centerline':'CILT')+' confirmado y guardado correctamente.';}).catch(function(){sm.style.display='none';bn.disabled=false;eb.style.display='block';eb.textContent='Error al guardar. Verifica la conexion.';});}
